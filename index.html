@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TETRIS VERDE</title>
+    <title>TETRIS ROSA - Super</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: #1a3a1a;
+            background: #1a0b16;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -20,11 +20,11 @@
             padding: 20px;
         }
         .game-container {
-            background: #0f2b0f;
+            background: #2b0826;
             border-radius: 2rem;
             padding: 1.5rem 2rem;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-            border: 2px solid #6b8c42;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+            border: 2px solid #6b2d5a;
         }
         .tetris-panel {
             display: flex;
@@ -34,7 +34,7 @@
             align-items: flex-start;
         }
         .board-section {
-            background: #0a1f0a;
+            background: #24021f;
             border-radius: 1rem;
             padding: 0.8rem;
             box-shadow: inset 0 0 10px #00000066, 0 10px 20px rgba(0,0,0,0.5);
@@ -42,12 +42,12 @@
         canvas#boardCanvas {
             display: block;
             margin: 0 auto;
-            box-shadow: 0 0 0 2px #8bc34a, 0 0 0 5px #1e3a1e;
+            box-shadow: 0 0 0 2px #ef66a3, 0 0 0 6px #2d0a26;
             border-radius: 0.5rem;
-            background-color: #0a1a0a;
+            background-color: #0f0014;
         }
         .info-area {
-            background: #0f2f0fcc;
+            background: #1e0423;
             backdrop-filter: blur(8px);
             border-radius: 2rem;
             padding: 1.5rem 1.8rem;
@@ -55,11 +55,11 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            border: 1px solid #8bc34a;
+            border: 1px solid #f28ab8;
             box-shadow: 0 8px 18px black;
         }
         .next-piece {
-            background: #0a1f0a;
+            background: #1a0421;
             border-radius: 1.5rem;
             padding: 0.8rem;
             text-align: center;
@@ -69,47 +69,47 @@
             font-weight: bold;
             font-size: 1.2rem;
             letter-spacing: 2px;
-            color: #b0d680;
+            color: #ff8fc7;
             text-transform: uppercase;
         }
         canvas#nextCanvas {
-            background-color: #0a1a0a;
+            background-color: #0f0014;
             border-radius: 0.8rem;
             display: block;
             margin: 0 auto;
-            box-shadow: inset 0 0 4px #8bc34a, 0 2px 8px black;
+            box-shadow: inset 0 0 4px #ef66a3, 0 2px 8px black;
         }
         .score-card {
-            background: #0f2f0f;
+            background: #14001d;
             padding: 0.6rem 1rem;
             border-radius: 1.8rem;
             text-align: center;
-            border-bottom: 3px solid #8bc34a;
+            border-bottom: 3px solid #ef66a3;
         }
         .score-card h3 {
             margin: 0;
             font-size: 0.85rem;
-            color: #d4eabb;
+            color: #ffc3dc;
         }
         .score-value {
             font-size: 2.3rem;
             font-weight: 800;
-            color: #e0ffb0;
-            text-shadow: 0 0 5px #3b6e3b;
+            color: #ff66a1;
+            text-shadow: 0 0 8px #ffffff, 0 0 12px #ff66a1;
             font-family: monospace;
         }
         .controls {
             margin-top: 0.5rem;
-            background: #0f2f0f;
+            background: #1a0421;
             border-radius: 2rem;
             padding: 0.7rem 1rem;
             text-align: center;
             font-size: 0.7rem;
-            color: #c0e080;
+            color: #ffb6d9;
             font-weight: bold;
         }
         button {
-            background: #2b5a2b;
+            background: #d81b60;
             border: none;
             font-family: inherit;
             font-weight: bold;
@@ -117,15 +117,15 @@
             padding: 8px 24px;
             margin-top: 8px;
             border-radius: 40px;
-            color: #e0ffb0;
+            color: #ffffff;
             cursor: pointer;
             transition: 0.07s linear;
-            box-shadow: 0 5px 0 #1a3a1a;
-            border: 1px solid #8bc34a;
+            box-shadow: 0 5px 0 #8c123a;
+            border: 2px solid #ffffff;
         }
         button:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #1a3a1a;
+            box-shadow: 0 2px 0 #8c123a;
         }
         @media (max-width: 680px) {
             .game-container { padding: 0.8rem; }
@@ -143,21 +143,21 @@
         </div>
         <div class="info-area">
             <div class="next-piece">
-                <p>➡️ PRÓXIMO ⬅️</p>
+                <p>PRÓXIMO</p>
                 <canvas id="nextCanvas" width="120" height="120"></canvas>
             </div>
             <div class="score-card">
-                <h3>🍃 PONTOS</h3>
+                <h3>PONTOS</h3>
                 <div class="score-value" id="scoreDisplay">0</div>
             </div>
             <div class="score-card">
-                <h3>📊 LINHAS</h3>
+                <h3>LINHAS</h3>
                 <div class="score-value" id="linesDisplay">0</div>
             </div>
-            <button id="resetButton">🔄 NOVO JOGO</button>
+            <button id="resetButton">NOVO JOGO</button>
             <div class="controls">
-                ◀  ▶  |  ▲  ROTACIONAR<br>
-                ▼  DESCER  |  ESPAÇO: DROP
+                ◀ ▶ | ▲ ROTACIONAR<br>
+                ▼ DESCER | ESPAÇO: DROP
             </div>
         </div>
     </div>
@@ -170,13 +170,13 @@
         const BLOCK_SIZE = 30;
         
         const TETROMINOS = [
-            { shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#80e5ff' }, // I
-            { shape: [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]], color: '#ffff66' }, // O
-            { shape: [[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,0,0,0]], color: '#cc99ff' }, // T
-            { shape: [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]], color: '#80ff80' }, // S
-            { shape: [[0,0,0,0],[1,1,0,0],[0,1,1,0],[0,0,0,0]], color: '#ff8080' }, // Z
-            { shape: [[0,0,0,0],[1,0,0,0],[1,1,1,0],[0,0,0,0]], color: '#80b3ff' }, // J
-            { shape: [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]], color: '#ffb380' }  // L
+            { shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#fbcfe8' },
+            { shape: [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]], color: '#ffffff' },
+            { shape: [[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,0,0,0]], color: '#f472b6' },
+            { shape: [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]], color: '#fce7f3' },
+            { shape: [[0,0,0,0],[1,1,0,0],[0,1,1,0],[0,0,0,0]], color: '#be185d' },
+            { shape: [[0,0,0,0],[1,0,0,0],[1,1,1,0],[0,0,0,0]], color: '#831843' },
+            { shape: [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]], color: '#9d174d' }
         ];
 
         const boardCanvas = document.getElementById('boardCanvas');
@@ -207,9 +207,9 @@
         function drawBlock(x, y, color) {
             ctx.fillStyle = color;
             ctx.fillRect(x, y, BLOCK_SIZE-0.5, BLOCK_SIZE-0.5);
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
             ctx.fillRect(x+1, y+1, BLOCK_SIZE-3, 4);
-            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillStyle = 'rgba(0,0,0,0.25)';
             ctx.fillRect(x+BLOCK_SIZE-6, y+2, 4, BLOCK_SIZE-5);
         }
 
@@ -220,9 +220,9 @@
                     if (board[row][col]) {
                         drawBlock(col*BLOCK_SIZE, row*BLOCK_SIZE, board[row][col]);
                     } else {
-                        ctx.fillStyle = '#0a1a0a';
+                        ctx.fillStyle = '#0f0014';
                         ctx.fillRect(col*BLOCK_SIZE, row*BLOCK_SIZE, BLOCK_SIZE-0.5, BLOCK_SIZE-0.5);
-                        ctx.strokeStyle = '#1e3a1e';
+                        ctx.strokeStyle = '#2d0a26';
                         ctx.strokeRect(col*BLOCK_SIZE, row*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                     }
                 }
@@ -241,17 +241,17 @@
             }
             if (gameOver) {
                 ctx.font = 'bold 24px monospace';
-                ctx.fillStyle = '#d0ffb0';
+                ctx.fillStyle = '#ffffff';
                 ctx.fillText('GAME OVER', 40, 280);
                 ctx.font = '12px monospace';
-                ctx.fillStyle = '#a0d080';
-                ctx.fillText(' aperte NOVO JOGO', 75, 340);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('aperte NOVO JOGO', 80, 340);
             }
         }
 
         function drawNext() {
             nextCtx.clearRect(0, 0, 120, 120);
-            nextCtx.fillStyle = '#0a1a0a';
+            nextCtx.fillStyle = '#0f0014';
             nextCtx.fillRect(0, 0, 120, 120);
             if (nextPiece) {
                 const shape = nextPiece.shape;
@@ -262,7 +262,7 @@
                         if (shape[row][col]) {
                             nextCtx.fillStyle = nextPiece.color;
                             nextCtx.fillRect(offsetX + col*30, offsetY + row*30, 28, 28);
-                            nextCtx.fillStyle = 'rgba(255,255,255,0.3)';
+                            nextCtx.fillStyle = 'rgba(255,255,255,0.45)';
                             nextCtx.fillRect(offsetX + col*30, offsetY + row*30, 26, 5);
                         }
                     }
