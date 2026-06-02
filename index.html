@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TETRIS ROSA - Super</title>
+    <title>TETRIS CASTANHO - Super</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: #1a0b16;
+            background: #3e1f0d;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -20,11 +20,11 @@
             padding: 20px;
         }
         .game-container {
-            background: #2b0826;
+            background: #5a2e18;
             border-radius: 2rem;
             padding: 1.5rem 2rem;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
-            border: 2px solid #6b2d5a;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.15);
+            border: 2px solid #8c5a3c;
         }
         .tetris-panel {
             display: flex;
@@ -34,7 +34,7 @@
             align-items: flex-start;
         }
         .board-section {
-            background: #24021f;
+            background: #4a2411;
             border-radius: 1rem;
             padding: 0.8rem;
             box-shadow: inset 0 0 10px #00000066, 0 10px 20px rgba(0,0,0,0.5);
@@ -42,12 +42,12 @@
         canvas#boardCanvas {
             display: block;
             margin: 0 auto;
-            box-shadow: 0 0 0 2px #ef66a3, 0 0 0 6px #2d0a26;
+            box-shadow: 0 0 0 2px #c07a4a, 0 0 0 6px #2b1508;
             border-radius: 0.5rem;
-            background-color: #0f0014;
+            background-color: #3a1d0c;
         }
         .info-area {
-            background: #1e0423;
+            background: #4f2712;
             backdrop-filter: blur(8px);
             border-radius: 2rem;
             padding: 1.5rem 1.8rem;
@@ -55,11 +55,11 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            border: 1px solid #f28ab8;
+            border: 1px solid #c4895e;
             box-shadow: 0 8px 18px black;
         }
         .next-piece {
-            background: #1a0421;
+            background: #3f1e0d;
             border-radius: 1.5rem;
             padding: 0.8rem;
             text-align: center;
@@ -69,47 +69,47 @@
             font-weight: bold;
             font-size: 1.2rem;
             letter-spacing: 2px;
-            color: #ff8fc7;
+            color: #ffd8b8;
             text-transform: uppercase;
         }
         canvas#nextCanvas {
-            background-color: #0f0014;
+            background-color: #3a1d0c;
             border-radius: 0.8rem;
             display: block;
             margin: 0 auto;
-            box-shadow: inset 0 0 4px #ef66a3, 0 2px 8px black;
+            box-shadow: inset 0 0 4px #c07a4a, 0 2px 8px black;
         }
         .score-card {
-            background: #14001d;
+            background: #3e1a08;
             padding: 0.6rem 1rem;
             border-radius: 1.8rem;
             text-align: center;
-            border-bottom: 3px solid #ef66a3;
+            border-bottom: 3px solid #c68955;
         }
         .score-card h3 {
             margin: 0;
             font-size: 0.85rem;
-            color: #ffc3dc;
+            color: #ffe7d0;
         }
         .score-value {
             font-size: 2.3rem;
             font-weight: 800;
-            color: #ff66a1;
-            text-shadow: 0 0 8px #ffffff, 0 0 12px #ff66a1;
+            color: #ffb07a;
+            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffb07a;
             font-family: monospace;
         }
         .controls {
             margin-top: 0.5rem;
-            background: #1a0421;
+            background: #3f1e0d;
             border-radius: 2rem;
             padding: 0.7rem 1rem;
             text-align: center;
             font-size: 0.7rem;
-            color: #ffb6d9;
+            color: #ffd8b8;
             font-weight: bold;
         }
         button {
-            background: #d81b60;
+            background: #a0522d;
             border: none;
             font-family: inherit;
             font-weight: bold;
@@ -120,12 +120,12 @@
             color: #ffffff;
             cursor: pointer;
             transition: 0.07s linear;
-            box-shadow: 0 5px 0 #8c123a;
-            border: 2px solid #ffffff;
+            box-shadow: 0 5px 0 #70361a;
+            border: 2px solid #ffd8b8;
         }
         button:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #8c123a;
+            box-shadow: 0 2px 0 #70361a;
         }
         @media (max-width: 680px) {
             .game-container { padding: 0.8rem; }
@@ -170,13 +170,13 @@
         const BLOCK_SIZE = 30;
         
         const TETROMINOS = [
-            { shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#fbcfe8' },
-            { shape: [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]], color: '#ffffff' },
-            { shape: [[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,0,0,0]], color: '#f472b6' },
-            { shape: [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]], color: '#fce7f3' },
-            { shape: [[0,0,0,0],[1,1,0,0],[0,1,1,0],[0,0,0,0]], color: '#be185d' },
-            { shape: [[0,0,0,0],[1,0,0,0],[1,1,1,0],[0,0,0,0]], color: '#831843' },
-            { shape: [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]], color: '#9d174d' }
+            { shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#d2691e' },
+            { shape: [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]], color: '#ffdead' },
+            { shape: [[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,0,0,0]], color: '#a0522d' },
+            { shape: [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]], color: '#cd853f' },
+            { shape: [[0,0,0,0],[1,1,0,0],[0,1,1,0],[0,0,0,0]], color: '#8b4513' },
+            { shape: [[0,0,0,0],[1,0,0,0],[1,1,1,0],[0,0,0,0]], color: '#deb887' },
+            { shape: [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]], color: '#b22222' }
         ];
 
         const boardCanvas = document.getElementById('boardCanvas');
@@ -220,9 +220,9 @@
                     if (board[row][col]) {
                         drawBlock(col*BLOCK_SIZE, row*BLOCK_SIZE, board[row][col]);
                     } else {
-                        ctx.fillStyle = '#0f0014';
+                        ctx.fillStyle = '#3a1d0c';
                         ctx.fillRect(col*BLOCK_SIZE, row*BLOCK_SIZE, BLOCK_SIZE-0.5, BLOCK_SIZE-0.5);
-                        ctx.strokeStyle = '#2d0a26';
+                        ctx.strokeStyle = '#5f341c';
                         ctx.strokeRect(col*BLOCK_SIZE, row*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                     }
                 }
@@ -251,7 +251,7 @@
 
         function drawNext() {
             nextCtx.clearRect(0, 0, 120, 120);
-            nextCtx.fillStyle = '#0f0014';
+            nextCtx.fillStyle = '#3a1d0c';
             nextCtx.fillRect(0, 0, 120, 120);
             if (nextPiece) {
                 const shape = nextPiece.shape;
