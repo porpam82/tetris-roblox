@@ -420,6 +420,11 @@
                 <button class="tab" data-tab="markets">Markets</button>
                 <button class="tab" data-tab="game-page">⭐ Game Page (1 jogo)</button>
                 <button class="tab" data-tab="match-wide">📊 Match Features (1 linha/jogo)</button>
+                <button class="tab" data-tab="ev-picks">🎯 EV Picks</button>
+                <button class="tab" data-tab="pinnacle">📊 Fair Probabilities</button>
+                <button class="tab" data-tab="hold-heatmap">💰 Hold/Vig Heatmap</button>
+                <button class="tab" data-tab="backtest">📈 Backtest</button>
+                <button class="tab" data-tab="trading-tools">🧮 Trading Tools</button>
             </div>
         </nav>
 
@@ -804,6 +809,197 @@
                         </table>
                     </div>
                 </div>
+            </div>
+
+            <!-- 🎯 EV Picks -->
+            <div class="panel" id="ev-picks">
+                <div class="card" style="background:#3a1a1a;border:1px solid #ff4d4d;margin-bottom:14px;">
+                    <div style="padding:12px 14px;color:#ff9999;font-size:12px;line-height:1.5;">
+                        ⚠ <b>PAPER MODE — não apostar com este modelo.</b> Backtest histórico em 617 jogos com α=0.5 + Dixon-Coles τ=−0.12 → ROI <b>−18.1%</b>, hit-rate 21.4% (random ≈ 33%). Razão: as odds bet365 já incorporam xG. Modelo replica o mercado sem informação adicional. Tab serve para infraestrutura, não para stake real.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">🎯 Picks ordenados por max EV (modelo)</div>
+                            <div class="data-source">Dixon-Coles + xG rolling 8 jogos + blend market α=0.5 · 617 jogos com predições</div>
+                        </div>
+                        <div class="card-tag" id="ev-count">…</div>
+                    </div>
+                    <div style="padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;background:var(--bg-2);border-bottom:1px solid var(--line);">
+                        <select id="ev-league" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;"></select>
+                        <input id="ev-min" type="number" step="1" value="5" min="0" max="50" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;width:80px;" placeholder="EV ≥ %">
+                        <span style="font-size:11px;color:var(--txt-2);align-self:center;">EV mínimo (%)</span>
+                    </div>
+                    <div style="overflow:auto;max-height:75vh;">
+                        <table id="ev-table" style="font-size:11px;white-space:nowrap;">
+                            <thead><tr>
+                                <th>Data</th><th>Liga</th><th>Casa</th><th>Fora</th>
+                                <th>Pick</th><th>Odd</th><th>p_model</th><th>p_fair</th>
+                                <th>EV%</th><th>Kelly%</th><th>λH</th><th>λA</th><th>FT</th><th>Resultado</th>
+                            </tr></thead>
+                            <tbody id="ev-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Fair Probabilities -->
+            <div class="panel" id="pinnacle">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">📊 Fair Probabilities (de-vigged)</div>
+                            <div class="data-source">Inversão das odds bet365 com remoção proporcional do vig · benchmark de "verdade" do mercado</div>
+                        </div>
+                        <div class="card-tag" id="fp-count">…</div>
+                    </div>
+                    <div style="padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;background:var(--bg-2);border-bottom:1px solid var(--line);">
+                        <select id="fp-league" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;"></select>
+                        <select id="fp-season" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;"></select>
+                    </div>
+                    <div style="overflow:auto;max-height:75vh;">
+                        <table id="fp-table" style="font-size:11px;white-space:nowrap;">
+                            <thead><tr>
+                                <th>Data</th><th>Casa</th><th>Fora</th>
+                                <th>1</th><th>X</th><th>2</th>
+                                <th>p_fair_H</th><th>p_fair_D</th><th>p_fair_A</th>
+                                <th>Vig %</th><th>Resultado</th>
+                            </tr></thead>
+                            <tbody id="fp-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 💰 Hold/Vig Heatmap -->
+            <div class="panel" id="hold-heatmap">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">💰 Hold/Vig por Liga × Época</div>
+                            <div class="data-source">Vig médio (overround − 1) das odds 1X2 bet365 · valores menores = melhor preço para o apostador</div>
+                        </div>
+                    </div>
+                    <div style="overflow:auto;padding:14px;">
+                        <table id="hh-table" style="font-size:12px;">
+                            <thead><tr id="hh-head"></tr></thead>
+                            <tbody id="hh-body"></tbody>
+                        </table>
+                    </div>
+                    <div style="padding:14px;border-top:1px solid var(--line);font-size:11px;color:var(--txt-2);">
+                        <b style="color:var(--acc);">Como ler:</b> verde = vig baixo (favorável), vermelho = vig alto. bet365 historicamente em 5-7% no 1X2 de Liga 1; valores acima sugerem mercado menos eficiente.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📈 Backtest -->
+            <div class="panel" id="backtest">
+                <div class="card" style="background:#3a1a1a;border:1px solid #ff4d4d;margin-bottom:14px;">
+                    <div style="padding:12px 14px;color:#ff9999;font-size:12px;">
+                        ⚠ Resultado real do backtest. ROI negativo significa que <b>esta estratégia perdia dinheiro</b>. Mostrado para validação metodológica, não como recomendação.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">📈 Backtest — flat €1 stake na pick com EV máximo</div>
+                            <div class="data-source">5550 jogos | 617 com predições | sweep EV threshold</div>
+                        </div>
+                    </div>
+                    <div style="overflow:auto;padding:14px;">
+                        <table id="bt-table" style="font-size:12px;">
+                            <thead><tr>
+                                <th>EV Threshold</th><th>Apostas</th><th>Vitórias</th><th>Hit-rate</th>
+                                <th>Profit €</th><th>ROI</th><th>Avg Odd</th>
+                            </tr></thead>
+                            <tbody id="bt-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:14px;">
+                    <div class="card-head"><div class="card-title">Por mercado</div></div>
+                    <div style="overflow:auto;padding:14px;">
+                        <table id="bt-pick-table" style="font-size:12px;">
+                            <thead><tr>
+                                <th>Pick</th><th>Apostas</th><th>Vitórias</th><th>Hit-rate</th><th>Profit €</th><th>ROI</th>
+                            </tr></thead>
+                            <tbody id="bt-pick-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🧮 Trading Tools (calculadoras Sports Trading Life) -->
+            <div class="panel" id="trading-tools">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">🧮 Trading Tools — Cash Out / Green Up / Free Bet</div>
+                            <div class="data-source">Calculadoras inspiradas em Sports Trading Life · aplicáveis em Betfair / BetinAsia</div>
+                        </div>
+                    </div>
+                    <div style="padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px;">
+                        <!-- 1) Cash Out -->
+                        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px;">
+                            <div style="font-weight:700;color:var(--acc);margin-bottom:8px;font-size:13px;">1) Cash Out (back-to-lay)</div>
+                            <div style="font-size:10px;color:var(--txt-2);margin-bottom:12px;">Entraste back. Mercado moveu. Quanto sai garantido?</div>
+                            <div class="ttool-row"><label>Stake back (€):</label><input type="number" id="co-stake" value="100" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd back (entry):</label><input type="number" id="co-back" value="3.0" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd lay (exit):</label><input type="number" id="co-lay" value="2.4" step="0.01"></div>
+                            <div class="ttool-row"><label>Comissão (%):</label><input type="number" id="co-comm" value="2" step="0.1"></div>
+                            <button onclick="calcCashOut()" class="ttool-btn">Calcular</button>
+                            <div id="co-out" class="ttool-result"></div>
+                        </div>
+                        <!-- 2) Green Up Method 2 -->
+                        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px;">
+                            <div style="font-weight:700;color:var(--acc);margin-bottom:8px;font-size:13px;">2) Green Up · Method 2 (Profit + Liability = Payout)</div>
+                            <div style="font-size:10px;color:var(--txt-2);margin-bottom:12px;">Lay para igualar profit em todos os outcomes (PDF Sports Trading Life Cash Out Handbook).</div>
+                            <div class="ttool-row"><label>Stake back (€):</label><input type="number" id="gu-stake" value="100" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd back:</label><input type="number" id="gu-back" value="3.0" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd lay actual:</label><input type="number" id="gu-lay" value="2.4" step="0.01"></div>
+                            <button onclick="calcGreenUp()" class="ttool-btn">Calcular</button>
+                            <div id="gu-out" class="ttool-result"></div>
+                        </div>
+                        <!-- 3) Free Bet (same stake) -->
+                        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px;">
+                            <div style="font-weight:700;color:var(--acc);margin-bottom:8px;font-size:13px;">3) Free Bet · Same Stake (skewed)</div>
+                            <div style="font-size:10px;color:var(--txt-2);margin-bottom:12px;">Lay com stake = back stake → loss = 0 num lado, free bet no outro.</div>
+                            <div class="ttool-row"><label>Stake back (€):</label><input type="number" id="fb-stake" value="100" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd back:</label><input type="number" id="fb-back" value="4.0" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd lay:</label><input type="number" id="fb-lay" value="3.5" step="0.01"></div>
+                            <button onclick="calcFreeBet()" class="ttool-btn">Calcular</button>
+                            <div id="fb-out" class="ttool-result"></div>
+                        </div>
+                        <!-- 4) Lay Stake -->
+                        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px;">
+                            <div style="font-weight:700;color:var(--acc);margin-bottom:8px;font-size:13px;">4) Lay Stake (proteção/equiv)</div>
+                            <div style="font-size:10px;color:var(--txt-2);margin-bottom:12px;">Lay stake equivalente: back €100 @ X = lay €? @ Y</div>
+                            <div class="ttool-row"><label>Stake back (€):</label><input type="number" id="ls-stake" value="100" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd back:</label><input type="number" id="ls-back" value="3.0" step="0.01"></div>
+                            <div class="ttool-row"><label>Odd lay:</label><input type="number" id="ls-lay" value="3.0" step="0.01"></div>
+                            <button onclick="calcLayStake()" class="ttool-btn">Calcular</button>
+                            <div id="ls-out" class="ttool-result"></div>
+                        </div>
+                        <!-- 5) Kelly -->
+                        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px;">
+                            <div style="font-weight:700;color:var(--acc);margin-bottom:8px;font-size:13px;">5) Kelly Criterion</div>
+                            <div style="font-size:10px;color:var(--txt-2);margin-bottom:12px;">f* = (p·(b+1)−1)/b · cap em 25% · usa fração 1/4 (Kelly conservador).</div>
+                            <div class="ttool-row"><label>Probabilidade real (0-1):</label><input type="number" id="kk-p" value="0.40" step="0.01" min="0" max="1"></div>
+                            <div class="ttool-row"><label>Odd decimal:</label><input type="number" id="kk-odd" value="3.0" step="0.01"></div>
+                            <div class="ttool-row"><label>Bankroll (€):</label><input type="number" id="kk-bk" value="1000" step="1"></div>
+                            <button onclick="calcKelly()" class="ttool-btn">Calcular</button>
+                            <div id="kk-out" class="ttool-result"></div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                .ttool-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;}
+                .ttool-row label{color:var(--txt-2);}
+                .ttool-row input{background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:5px 8px;border-radius:3px;font-size:11px;width:90px;text-align:right;}
+                .ttool-btn{width:100%;background:var(--acc);color:#000;border:none;padding:7px;border-radius:4px;font-weight:700;font-size:11px;cursor:pointer;margin-top:6px;}
+                .ttool-result{margin-top:10px;padding:10px;background:var(--bg-3);border-radius:4px;font-size:11px;color:var(--acc);font-family:monospace;white-space:pre;min-height:20px;}
+                </style>
             </div>
         </div>
     </div>
@@ -1533,6 +1729,294 @@
         a.href = url; a.download = `match_features_pt_${Date.now()}.csv`; a.click();
         URL.revokeObjectURL(url);
     }
+
+    // ========================================================
+    // 20. EV Picks (re-uses MW_DATA)
+    // ========================================================
+    function ensureMW() {
+        return new Promise(resolve => {
+            const check = () => MW_DATA.length ? resolve() : setTimeout(check, 100);
+            check();
+        });
+    }
+
+    async function loadEVPicks() {
+        await ensureMW();
+        const leagues = [...new Set(MW_DATA.map(r => r.league))].sort();
+        const sel = document.getElementById('ev-league');
+        sel.innerHTML = '<option value="">Todas as ligas</option>' + leagues.map(l => `<option>${l}</option>`).join('');
+        ['ev-league','ev-min'].forEach(id => {
+            document.getElementById(id).addEventListener('input', renderEV);
+            document.getElementById(id).addEventListener('change', renderEV);
+        });
+        renderEV();
+    }
+
+    function renderEV() {
+        const lg = document.getElementById('ev-league').value;
+        const minEV = parseFloat(document.getElementById('ev-min').value || 0) / 100;
+        const picks = MW_DATA.filter(r => r.max_ev != null && r.max_ev > minEV)
+            .filter(r => !lg || r.league === lg);
+        picks.sort((a,b) => b.max_ev - a.max_ev);
+        const rows = picks.slice(0, 300);
+        document.getElementById('ev-count').textContent = `${picks.length.toLocaleString()} picks`;
+
+        const cellPick = p => {
+            const sel = p.best_pick;
+            if (!sel) return '·';
+            const odd = sel === 'H' ? p.odd_1_ft : sel === 'D' ? p.odd_x_ft : p.odd_2_ft;
+            const pm = sel === 'H' ? p.p_model_h : sel === 'D' ? p.p_model_d : p.p_model_a;
+            const pf = sel === 'H' ? p.p_fair_h : sel === 'D' ? p.p_fair_d : p.p_fair_a;
+            const ev = sel === 'H' ? p.ev_h : sel === 'D' ? p.ev_d : p.ev_a;
+            const k  = sel === 'H' ? p.kelly_h : sel === 'D' ? p.kelly_d : p.kelly_a;
+            const ftRes = p.ft_result;
+            const won = ftRes && (ftRes === sel);
+            const cls = won ? 'win' : ftRes ? 'loss' : '';
+            const label = won ? 'GANHO' : ftRes ? 'PERDIDO' : 'PENDENTE';
+            return `<tr>
+                <td>${(p.match_date||'').slice(0,10)}</td>
+                <td style="font-size:9px;">${p.league}</td>
+                <td>${p.home}</td>
+                <td>${p.away}</td>
+                <td style="font-weight:700;color:var(--acc);">${sel}</td>
+                <td>${odd}</td>
+                <td>${pm ? (pm*100).toFixed(1)+'%' : '·'}</td>
+                <td style="color:var(--info);">${pf ? (pf*100).toFixed(1)+'%' : '·'}</td>
+                <td style="font-weight:700;color:var(--acc);">${ev ? (ev*100).toFixed(1)+'%' : '·'}</td>
+                <td>${k ? (k*100).toFixed(2)+'%' : '·'}</td>
+                <td>${p.lambda_h || '·'}</td>
+                <td>${p.lambda_a || '·'}</td>
+                <td>${p.ft_home != null ? p.ft_home+'-'+p.ft_away : '·'}</td>
+                <td class="${cls}" style="font-weight:700;">${label}</td>
+            </tr>`;
+        };
+        document.getElementById('ev-body').innerHTML = rows.map(cellPick).join('');
+    }
+
+    // ========================================================
+    // 21. Fair Probabilities tab (re-uses MW_DATA)
+    // ========================================================
+    async function loadFairProbs() {
+        await ensureMW();
+        const leagues = [...new Set(MW_DATA.map(r => r.league))].sort();
+        const seasons = [...new Set(MW_DATA.map(r => r.season))].sort().reverse();
+        document.getElementById('fp-league').innerHTML = '<option value="">Todas</option>' + leagues.map(l=>`<option>${l}</option>`).join('');
+        document.getElementById('fp-season').innerHTML = '<option value="">Todas</option>' + seasons.map(s=>`<option>${s}</option>`).join('');
+        ['fp-league','fp-season'].forEach(id => document.getElementById(id).addEventListener('change', renderFP));
+        renderFP();
+    }
+    function renderFP() {
+        const lg = document.getElementById('fp-league').value;
+        const sn = document.getElementById('fp-season').value;
+        const data = MW_DATA.filter(r => r.odd_1_ft != null && (!lg || r.league === lg) && (!sn || r.season === sn));
+        document.getElementById('fp-count').textContent = `${data.length.toLocaleString()} jogos`;
+        const rows = data.slice(0, 400);
+        document.getElementById('fp-body').innerHTML = rows.map(r => {
+            const ftCls = r.ft_result === 'H' ? 'goals' : r.ft_result === 'A' ? 'loss' : '';
+            return `<tr>
+                <td>${(r.match_date||'').slice(0,10)}</td>
+                <td>${r.home}</td>
+                <td>${r.away}</td>
+                <td>${r.odd_1_ft}</td>
+                <td>${r.odd_x_ft}</td>
+                <td>${r.odd_2_ft}</td>
+                <td style="color:var(--info);">${r.p_fair_h ? (r.p_fair_h*100).toFixed(1)+'%' : '·'}</td>
+                <td style="color:var(--info);">${r.p_fair_d ? (r.p_fair_d*100).toFixed(1)+'%' : '·'}</td>
+                <td style="color:var(--info);">${r.p_fair_a ? (r.p_fair_a*100).toFixed(1)+'%' : '·'}</td>
+                <td>${r.vig_pct != null ? r.vig_pct.toFixed(2)+'%' : '·'}</td>
+                <td class="${ftCls}" style="font-weight:700;">${r.ft_home != null ? r.ft_home+'-'+r.ft_away+' ('+r.ft_result+')' : '·'}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ========================================================
+    // 22. Hold/Vig Heatmap (pivot Liga × Época)
+    // ========================================================
+    async function loadHoldHeatmap() {
+        await ensureMW();
+        const leagues = [...new Set(MW_DATA.map(r => r.league).filter(Boolean))].sort();
+        const seasons = [...new Set(MW_DATA.map(r => r.season).filter(Boolean))].sort();
+        // Compute averages
+        const cell = {};
+        leagues.forEach(l => { cell[l] = {}; seasons.forEach(s => cell[l][s] = []); });
+        MW_DATA.forEach(r => {
+            if (r.vig_pct != null && r.league && r.season) cell[r.league][r.season].push(r.vig_pct);
+        });
+        // Header
+        const head = document.getElementById('hh-head');
+        head.innerHTML = '<th style="text-align:left;padding:6px 12px;">Liga \\ Época</th>' + seasons.map(s=>`<th>${s}</th>`).join('') + '<th style="background:var(--bg-3);">Média</th>';
+        // Body rows
+        const colorFor = v => {
+            if (v == null) return '';
+            if (v < 5) return 'background:#0e3d2a;color:#3ee68a;';
+            if (v < 7) return 'background:#1a3a26;color:#9ee0b3;';
+            if (v < 9) return 'background:#3a3015;color:#ffe082;';
+            return 'background:#3a1a1a;color:#ff8a8a;';
+        };
+        document.getElementById('hh-body').innerHTML = leagues.map(l => {
+            const cells = seasons.map(s => {
+                const vals = cell[l][s];
+                const avg = vals.length ? vals.reduce((a,b)=>a+parseFloat(b),0)/vals.length : null;
+                return `<td style="text-align:center;padding:8px 12px;${colorFor(avg)}">${avg!=null?avg.toFixed(2)+'%':'·'}<div style="font-size:9px;opacity:0.6;">n=${vals.length}</div></td>`;
+            }).join('');
+            const allVals = seasons.flatMap(s => cell[l][s]);
+            const overall = allVals.length ? allVals.reduce((a,b)=>a+parseFloat(b),0)/allVals.length : null;
+            return `<tr>
+                <td style="font-weight:700;padding:8px 12px;background:var(--bg-2);">${l}</td>
+                ${cells}
+                <td style="text-align:center;padding:8px 12px;font-weight:700;background:var(--bg-3);${colorFor(overall)}">${overall!=null?overall.toFixed(2)+'%':'·'}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ========================================================
+    // 23. Backtest (computa em browser)
+    // ========================================================
+    async function loadBacktest() {
+        await ensureMW();
+        const data = MW_DATA.filter(r => r.max_ev != null && r.best_pick && r.ft_result);
+        const thresholds = [0.0, 0.02, 0.03, 0.05, 0.08, 0.10, 0.15, 0.20];
+        const tbody = document.getElementById('bt-body');
+        tbody.innerHTML = thresholds.map(t => {
+            const bets = data.filter(r => r.max_ev > t);
+            let wins = 0, profit = 0, oddSum = 0;
+            bets.forEach(b => {
+                const odd = b.best_pick === 'H' ? b.odd_1_ft : b.best_pick === 'D' ? b.odd_x_ft : b.odd_2_ft;
+                oddSum += parseFloat(odd);
+                if (b.best_pick === b.ft_result) { wins++; profit += parseFloat(odd) - 1; }
+                else profit -= 1;
+            });
+            const n = bets.length;
+            if (n === 0) return '';
+            const hit = 100 * wins / n;
+            const roi = 100 * profit / n;
+            const avgOdd = oddSum / n;
+            const roiCls = roi > 0 ? 'win' : 'loss';
+            return `<tr>
+                <td><b>EV ≥ ${(t*100).toFixed(0)}%</b></td>
+                <td>${n}</td>
+                <td>${wins}</td>
+                <td>${hit.toFixed(1)}%</td>
+                <td class="${roiCls}">${profit.toFixed(2)}</td>
+                <td class="${roiCls}" style="font-weight:700;">${roi.toFixed(2)}%</td>
+                <td>${avgOdd.toFixed(2)}</td>
+            </tr>`;
+        }).join('');
+
+        const pickBody = document.getElementById('bt-pick-body');
+        pickBody.innerHTML = ['H','D','A'].map(p => {
+            const bets = data.filter(r => r.best_pick === p && r.max_ev > 0.05);
+            let wins = 0, profit = 0;
+            bets.forEach(b => {
+                const odd = p === 'H' ? b.odd_1_ft : p === 'D' ? b.odd_x_ft : b.odd_2_ft;
+                if (p === b.ft_result) { wins++; profit += parseFloat(odd) - 1; }
+                else profit -= 1;
+            });
+            const n = bets.length;
+            const roi = n ? 100 * profit / n : 0;
+            const cls = roi > 0 ? 'win' : 'loss';
+            return `<tr>
+                <td><b>${p}</b></td><td>${n}</td><td>${wins}</td>
+                <td>${n ? (100*wins/n).toFixed(1) : 0}%</td>
+                <td class="${cls}">${profit.toFixed(2)}</td>
+                <td class="${cls}" style="font-weight:700;">${roi.toFixed(2)}%</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ========================================================
+    // 24. Trading Tools — calculators
+    // ========================================================
+    window.calcCashOut = function() {
+        const stake = parseFloat(document.getElementById('co-stake').value);
+        const back = parseFloat(document.getElementById('co-back').value);
+        const lay  = parseFloat(document.getElementById('co-lay').value);
+        const comm = parseFloat(document.getElementById('co-comm').value) / 100;
+        // Lay stake to lock equal profit: layStake = (back*stake)/lay
+        const layStake = (stake * back) / lay;
+        const liability = layStake * (lay - 1);
+        // Profit if back wins: stake*(back-1) - layStake*(lay-1) → after lay loses
+        const winsBack = stake * (back - 1) - liability;
+        const winsLay  = layStake - stake;
+        // Apply commission on winnings (Betfair model)
+        const guarBack = winsBack > 0 ? winsBack*(1-comm) : winsBack;
+        const guarLay  = winsLay  > 0 ? winsLay*(1-comm) : winsLay;
+        const guaranteed = Math.min(guarBack, guarLay);
+        document.getElementById('co-out').textContent =
+            `Lay stake:    €${layStake.toFixed(2)}\n` +
+            `Liability:    €${liability.toFixed(2)}\n` +
+            `Profit:       €${guaranteed.toFixed(2)}\n` +
+            `ROI:          ${(100*guaranteed/stake).toFixed(2)}%`;
+    };
+    window.calcGreenUp = function() {
+        const stake = parseFloat(document.getElementById('gu-stake').value);
+        const back = parseFloat(document.getElementById('gu-back').value);
+        const lay  = parseFloat(document.getElementById('gu-lay').value);
+        // Method 2: layStake = (back*stake) / lay, equal profit both sides
+        const layStake = (back * stake) / lay;
+        const profit = stake * (back - 1) - layStake * (lay - 1); // if back wins
+        const profitIfLay = layStake - stake; // if lay wins
+        document.getElementById('gu-out').textContent =
+            `Lay stake:        €${layStake.toFixed(2)}\n` +
+            `Liability:        €${(layStake*(lay-1)).toFixed(2)}\n` +
+            `Profit (back):    €${profit.toFixed(2)}\n` +
+            `Profit (lay):     €${profitIfLay.toFixed(2)}\n` +
+            `Equal? ${Math.abs(profit-profitIfLay) < 0.01 ? '✓ green' : 'check input'}`;
+    };
+    window.calcFreeBet = function() {
+        const stake = parseFloat(document.getElementById('fb-stake').value);
+        const back = parseFloat(document.getElementById('fb-back').value);
+        const lay  = parseFloat(document.getElementById('fb-lay').value);
+        // Same-stake lay: layStake = stake. If lay wins: 0 (even). If back wins: free bet
+        const layStake = stake;
+        const liability = layStake * (lay - 1);
+        const ifBack = stake * (back - 1) - liability;
+        const ifLay  = layStake - stake;
+        document.getElementById('fb-out').textContent =
+            `Lay stake:        €${layStake.toFixed(2)} (= back)\n` +
+            `Liability:        €${liability.toFixed(2)}\n` +
+            `Se BACK ganha:    €${ifBack.toFixed(2)} (free bet)\n` +
+            `Se LAY ganha:     €${ifLay.toFixed(2)} (zero)`;
+    };
+    window.calcLayStake = function() {
+        const stake = parseFloat(document.getElementById('ls-stake').value);
+        const back = parseFloat(document.getElementById('ls-back').value);
+        const lay  = parseFloat(document.getElementById('ls-lay').value);
+        const layStake = (back * stake) / lay;
+        const liability = layStake * (lay - 1);
+        document.getElementById('ls-out').textContent =
+            `Lay stake equiv:  €${layStake.toFixed(2)}\n` +
+            `Liability:        €${liability.toFixed(2)}\n` +
+            `Total exposed:    €${(stake + liability).toFixed(2)}`;
+    };
+    window.calcKelly = function() {
+        const p = parseFloat(document.getElementById('kk-p').value);
+        const odd = parseFloat(document.getElementById('kk-odd').value);
+        const bk = parseFloat(document.getElementById('kk-bk').value);
+        const b = odd - 1;
+        const f = b > 0 ? (p*(b+1) - 1) / b : 0;
+        const fCapped = Math.max(0, Math.min(f, 0.25));
+        const ev = p * odd - 1;
+        const stake = bk * fCapped;
+        const stakeQuarter = bk * fCapped * 0.25;
+        document.getElementById('kk-out').textContent =
+            `EV / unit:        ${(ev*100).toFixed(2)}%\n` +
+            `Kelly fraction:   ${(f*100).toFixed(2)}% (raw)\n` +
+            `Capped 25%:       ${(fCapped*100).toFixed(2)}%\n` +
+            `Stake full:       €${stake.toFixed(2)}\n` +
+            `Stake 1/4 Kelly:  €${stakeQuarter.toFixed(2)}`;
+    };
+
+    // Tab activation triggers (lazy load)
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const id = tab.dataset.tab;
+            if (id === 'ev-picks' && !window._evLoaded) { window._evLoaded = true; loadEVPicks(); }
+            if (id === 'pinnacle' && !window._fpLoaded) { window._fpLoaded = true; loadFairProbs(); }
+            if (id === 'hold-heatmap' && !window._hhLoaded) { window._hhLoaded = true; loadHoldHeatmap(); }
+            if (id === 'backtest' && !window._btLoaded) { window._btLoaded = true; loadBacktest(); }
+        });
+    });
 </script>
 </body>
 </html>
