@@ -1,426 +1,362 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TETRIS CASTANHO - Super</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Data - Primeira Liga</title>
     <style>
-        * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: #3e1f0d;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;
+            color: #e8eaed;
+            line-height: 1.5;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', monospace;
-            margin: 0;
             padding: 20px;
         }
-        .game-container {
-            background: #5a2e18;
-            border-radius: 2rem;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.15);
-            border: 2px solid #8c5a3c;
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid #2d3748; }
+        h1 { font-size: 1.75rem; font-weight: 600; color: #fff; }
+        .subtitle { color: #9ca3af; margin-top: 4px; font-size: 0.95rem; }
+        .tabs {
+            display: flex; gap: 4px; margin-bottom: 24px; overflow-x: auto;
+            padding-bottom: 8px;
         }
-        .tetris-panel {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-start;
+        .tab {
+            padding: 10px 20px; background: #1a202c; border: 1px solid #2d3748;
+            border-radius: 6px 6px 0 0; color: #9ca3af; cursor: pointer;
+            font-size: 0.9rem; white-space: nowrap; transition: all 0.2s;
         }
-        .board-section {
-            background: #4a2411;
-            border-radius: 1rem;
-            padding: 0.8rem;
-            box-shadow: inset 0 0 10px #00000066, 0 10px 20px rgba(0,0,0,0.5);
+        .tab:hover { background: #2d3748; color: #e8eaed; }
+        .tab.active { background: #10b981; color: #0f1419; border-color: #10b981; font-weight: 500; }
+        .panel { display: none; }
+        .panel.active { display: block; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+        table { width: 100%; border-collapse: collapse; background: #1a202c; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        thead th {
+            background: #1e293b; padding: 12px 16px; text-align: left;
+            font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
+            letter-spacing: 0.05em; color: #9ca3af; border-bottom: 1px solid #334155;
         }
-        canvas#boardCanvas {
-            display: block;
-            margin: 0 auto;
-            box-shadow: 0 0 0 2px #c07a4a, 0 0 0 6px #2b1508;
-            border-radius: 0.5rem;
-            background-color: #3a1d0c;
-        }
-        .info-area {
-            background: #4f2712;
-            backdrop-filter: blur(8px);
-            border-radius: 2rem;
-            padding: 1.5rem 1.8rem;
-            min-width: 180px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            border: 1px solid #c4895e;
-            box-shadow: 0 8px 18px black;
-        }
-        .next-piece {
-            background: #3f1e0d;
-            border-radius: 1.5rem;
-            padding: 0.8rem;
-            text-align: center;
-        }
-        .next-piece p {
-            margin: 0 0 0.8rem 0;
-            font-weight: bold;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            color: #ffd8b8;
-            text-transform: uppercase;
-        }
-        canvas#nextCanvas {
-            background-color: #3a1d0c;
-            border-radius: 0.8rem;
-            display: block;
-            margin: 0 auto;
-            box-shadow: inset 0 0 4px #c07a4a, 0 2px 8px black;
-        }
-        .score-card {
-            background: #3e1a08;
-            padding: 0.6rem 1rem;
-            border-radius: 1.8rem;
-            text-align: center;
-            border-bottom: 3px solid #c68955;
-        }
-        .score-card h3 {
-            margin: 0;
-            font-size: 0.85rem;
-            color: #ffe7d0;
-        }
-        .score-value {
-            font-size: 2.3rem;
-            font-weight: 800;
-            color: #ffb07a;
-            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffb07a;
-            font-family: monospace;
-        }
-        .controls {
-            margin-top: 0.5rem;
-            background: #3f1e0d;
-            border-radius: 2rem;
-            padding: 0.7rem 1rem;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #ffd8b8;
-            font-weight: bold;
-        }
-        button {
-            background: #a0522d;
-            border: none;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 1rem;
-            padding: 8px 24px;
-            margin-top: 8px;
-            border-radius: 40px;
-            color: #ffffff;
-            cursor: pointer;
-            transition: 0.07s linear;
-            box-shadow: 0 5px 0 #70361a;
-            border: 2px solid #ffd8b8;
-        }
-        button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #70361a;
-        }
-        @media (max-width: 680px) {
-            .game-container { padding: 0.8rem; }
-            .tetris-panel { gap: 1rem; }
-            .info-area { padding: 1rem; min-width: 140px; }
-            .score-value { font-size: 1.6rem; }
-        }
+        tbody td { padding: 12px 16px; border-bottom: 1px solid #2d3748; font-size: 0.9rem; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #1e293b; }
+        .rank { font-weight: 700; color: #10b981; width: 50px; }
+        .team { display: flex; align-items: center; gap: 10px; }
+        .team img { width: 24px; height: 24px; border-radius: 2px; }
+        .goals { font-weight: 600; color: #f59e0b; }
+        .assists { color: #3b82f6; }
+        .rating { font-weight: 600; color: #10b981; }
+        .xg { font-family: monospace; color: #f59e0b; }
+        .pos-session { font-weight: 600; }
+        .status-current { color: #10b981; font-weight: 500; }
+        .status-past { color: #6b7280; }
+        .win { color: #10b981; }
+        .loss { color: #ef4444; }
+        .draw { color: #f59e0b; }
+        .btn { padding: 8px 16px; background: #10b981; color: #0f1419; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 0.85rem; }
+        .btn:hover { background: #059669; }
+        .badge { padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .badge-league { background: #3b82f6; color: #fff; }
+        .badge-cup { background: #8b5cf6; color: #fff; }
+        .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .section-title::before { content: ''; width: 4px; height: 20px; background: #10b981; border-radius: 2px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } th, td { padding: 8px 12px; font-size: 0.8rem; } .tab { padding: 8px 14px; font-size: 0.8rem; } }
+        .empty { text-align: center; padding: 40px; color: #6b7280; }
+        .api-error { background: #7f1d1d; border: 1px solid #ef4444; color: #fca5a5; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+        .loading { text-align: center; padding: 40px; color: #9ca3af; }
+        .data-source { font-size: 0.75rem; color: #6b7280; margin-bottom: 12px; }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="tetris-panel">
-        <div class="board-section">
-            <canvas id="boardCanvas" width="300" height="600"></canvas>
+    <div class="container">
+        <header>
+            <h1>Primeira Liga 2024/25 — Football Data</h1>
+            <p class="subtitle">Dados no Supabase — Época 2024 completa, 2025 restrita (Free Tier)</p>
+        </header>
+
+        <div class="tabs" id="tabs">
+            <button class="tab active" data-tab="top-scorers">Melhores Marcadores</button>
+            <button class="tab" data-tab="standings">Classificação</button>
+            <button class="tab" data-tab="fixtures">Estatísticas de Jogo</button>
+            <button class="tab" data-tab="predictions">Previsões</button>
+            <button class="tab" data-tab="h2h">Histórico H2H</button>
+            <button class="tab" data-tab="leagues">Ligas Portuguesas</button>
         </div>
-        <div class="info-area">
-            <div class="next-piece">
-                <p>PRÓXIMO</p>
-                <canvas id="nextCanvas" width="120" height="120"></canvas>
-            </div>
-            <div class="score-card">
-                <h3>PONTOS</h3>
-                <div class="score-value" id="scoreDisplay">0</div>
-            </div>
-            <div class="score-card">
-                <h3>LINHAS</h3>
-                <div class="score-value" id="linesDisplay">0</div>
-            </div>
-            <button id="resetButton">NOVO JOGO</button>
-            <div class="controls">
-                ◀ ▶ | ▲ ROTACIONAR<br>
-                ▼ DESCER | ESPAÇO: DROP
-            </div>
+
+        <!-- Top Scorers -->
+        <div class="panel active" id="top-scorers">
+            <h2 class="section-title">Top 20 Marcadores — 2024</h2>
+            <div class="data-source">Fonte: Supabase (populado via API-Football Free Tier)</div>
+            <div class="loading" id="loading-scorers">A carregar...</div>
+            <table id="table-scorers" style="display:none;">
+                <thead><tr><th>#</th><th>Jogador</th><th>Clube</th><th>Golos</th><th>Assistências</th><th>Jogos</th><th>Minutos</th><th>Rating</th><th>Penalties</th></tr></thead><tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Standings -->
+        <div class="panel" id="standings">
+            <h2 class="section-title">Classificação Final — 2024</h2>
+            <div class="data-source">Fonte: Supabase (populado via API-Football Free Tier)</div>
+            <div class="loading" id="loading-standings">A carregar...</div>
+            <table id="table-standings" style="display:none;">
+                <thead><tr><th>Pos</th><th>Equipa</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>DG</th><th>Pts</th></tr></thead><tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Fixture Stats -->
+        <div class="panel" id="fixtures">
+            <h2 class="section-title">Estatísticas de Jogo — FC Porto 3-0 Moreirense (Fixture 1232011)</h2>
+            <div class="data-source">Fonte: Supabase (populado via API-Football Free Tier)</div>
+            <div class="loading" id="loading-fixtures">A carregar...</div>
+            <div style="overflow-x:auto;">  <table id="table-fixtures" style="display:none;">
+                <thead><tr><th>Métrica</th><th>FC Porto (Casa)</th><th>Moreirense (Fora)</th></tr></thead><tbody></tbody>
+            </table></div>
+            <h2 class="section-title" style="margin-top:24px;">Estatísticas dos Jogadores (FC Porto)</h2>
+            <div class="loading" id="loading-player-stats">A carregar...</div>
+            <table id="table-player-stats" style="display:none;">
+                <thead><tr><th>Jogador</th><th>Pos</th><th>Min</th><th>Rating</th><th>Golos</th><th>Assist</th><th>Remates</th><th>Passes</th><th>Duels</th></tr></thead><tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Predictions -->
+        <div class="panel" id="predictions">
+            <h2 class="section-title">Previsão — Porto vs Moreirense</h2>
+            <div class="data-source">Fonte: Supabase (populado via API-Football Free Tier)</div>
+            <div class="loading" id="loading-predictions">A carregar...</div>
+            <div id="predictions-content" style="display:none;"></div>
+        </div>
+
+        <!-- H2H -->
+        <div class="panel" id="h2h">
+            <h2 class="section-title">Histórico Porto vs Moreirense (Últimos 7)</h2>
+            <div class="data-source">Fonte: Supabase (populado via API-Football Free Tier)</div>
+            <div class="loading" id="loading-h2h">A carregar...</div>
+            <table id="table-h2h" style="display:none;">
+                <thead><tr><th>Data</th><th>Competição</th><th>Casa</th><th>Fora</th><th>Resultado</th></tr></thead><tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Leagues -->
+        <div class="panel" id="leagues">
+            <h2 class="section-title">Ligas/Competições Portuguesas Disponíveis</h2>
+            <div class="data-source">Fonte: Supabase (populado via API-Football Free Tier)</div>
+            <div class="loading" id="loading-leagues">A carregar...</div>
+            <table id="table-leagues" style="display:none;">
+                <thead><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Época Atual</th><th>Cobertura</th></tr></thead><tbody></tbody>
+            </table>
         </div>
     </div>
-</div>
 
-<script>
-    (function(){
-        const COLS = 10;
-        const ROWS = 20;
-        const BLOCK_SIZE = 30;
-        
-        const TETROMINOS = [
-            { shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#d2691e' },
-            { shape: [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]], color: '#ffdead' },
-            { shape: [[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,0,0,0]], color: '#a0522d' },
-            { shape: [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]], color: '#cd853f' },
-            { shape: [[0,0,0,0],[1,1,0,0],[0,1,1,0],[0,0,0,0]], color: '#8b4513' },
-            { shape: [[0,0,0,0],[1,0,0,0],[1,1,1,0],[0,0,0,0]], color: '#deb887' },
-            { shape: [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]], color: '#b22222' }
-        ];
+    <script>
+        const SUPABASE_URL = 'https://supabase.porpamtech.com';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcnBhbXRlY2giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNDU2NzIwMCwiZXhwIjoyMDUwMTQzMjAwfQ.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
 
-        const boardCanvas = document.getElementById('boardCanvas');
-        const ctx = boardCanvas.getContext('2d');
-        const nextCanvas = document.getElementById('nextCanvas');
-        const nextCtx = nextCanvas.getContext('2d');
-        const scoreSpan = document.getElementById('scoreDisplay');
-        const linesSpan = document.getElementById('linesDisplay');
-        const resetBtn = document.getElementById('resetButton');
-
-        let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-        let activePiece = null;
-        let nextPiece = null;
-        let score = 0;
-        let totalLines = 0;
-        let gameOver = false;
-        let fallInterval = null;
-        let level = 1;
-
-        function getDelay() { return Math.max(80, 500 - (level-1)*35); }
-
-        function randomPiece() {
-            const idx = Math.floor(Math.random() * TETROMINOS.length);
-            const p = TETROMINOS[idx];
-            return { shape: p.shape.map(row => [...row]), color: p.color };
+        async function sb(query, table) {
+            const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+            const res = await fetch(url, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            if (!res.ok) throw new Error(`${table}: ${res.status} ${await res.text()}`);
+            return res.json();
         }
 
-        function drawBlock(x, y, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y, BLOCK_SIZE-0.5, BLOCK_SIZE-0.5);
-            ctx.fillStyle = 'rgba(255,255,255,0.45)';
-            ctx.fillRect(x+1, y+1, BLOCK_SIZE-3, 4);
-            ctx.fillStyle = 'rgba(0,0,0,0.25)';
-            ctx.fillRect(x+BLOCK_SIZE-6, y+2, 4, BLOCK_SIZE-5);
+        function hideLoading(id) { document.getElementById(id).style.display = 'none'; }
+        function showTable(id) { document.getElementById(id).style.display = 'table'; }
+        function showError(containerId, msg) {
+            document.getElementById(containerId).innerHTML = `<div class="api-error">${msg}</div>`;
         }
 
-        function drawBoard() {
-            ctx.clearRect(0, 0, 300, 600);
-            for (let row = 0; row < ROWS; row++) {
-                for (let col = 0; col < COLS; col++) {
-                    if (board[row][col]) {
-                        drawBlock(col*BLOCK_SIZE, row*BLOCK_SIZE, board[row][col]);
-                    } else {
-                        ctx.fillStyle = '#3a1d0c';
-                        ctx.fillRect(col*BLOCK_SIZE, row*BLOCK_SIZE, BLOCK_SIZE-0.5, BLOCK_SIZE-0.5);
-                        ctx.strokeStyle = '#5f341c';
-                        ctx.strokeRect(col*BLOCK_SIZE, row*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                    }
-                }
-            }
-            if (activePiece && !gameOver) {
-                const shape = activePiece.shape;
-                for (let row = 0; row < shape.length; row++) {
-                    for (let col = 0; col < shape[0].length; col++) {
-                        if (shape[row][col]) {
-                            const x = (activePiece.x + col) * BLOCK_SIZE;
-                            const y = (activePiece.y + row) * BLOCK_SIZE;
-                            drawBlock(x, y, activePiece.color);
-                        }
-                    }
-                }
-            }
-            if (gameOver) {
-                ctx.font = 'bold 24px monospace';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText('GAME OVER', 40, 280);
-                ctx.font = '12px monospace';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText('aperte NOVO JOGO', 80, 340);
-            }
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // 1. Top Scorers
+        async function loadTopScorers() {
+            try {
+                const data = await sb('league_id=eq.94&season=eq.2024&order=rank.asc&limit=20', 'top_scorers');
+                const tbody = document.querySelector('#table-scorers tbody');
+                data.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="rank">${p.rank}</td>
+                            <td class="team"><img src="${p.player_photo}" alt="" onerror="this.style.display='none'"> ${p.player_name}</td>
+                            <td>${p.team_name}</td>
+                            <td class="goals">${p.goals}</td>
+                            <td class="assists">${p.assists}</td>
+                            <td>${p.appearances}</td>
+                            <td>${p.minutes}</td>
+                            <td class="rating">${p.rating}</td>
+                            <td>${p.penalties_scored}/${p.penalties_total}</td>
+                        </tr>`;
+                });
+                hideLoading('loading-scorers'); showTable('table-scorers');
+            } catch (e) { showError('top-scorers', e.message); }
         }
 
-        function drawNext() {
-            nextCtx.clearRect(0, 0, 120, 120);
-            nextCtx.fillStyle = '#3a1d0c';
-            nextCtx.fillRect(0, 0, 120, 120);
-            if (nextPiece) {
-                const shape = nextPiece.shape;
-                const offsetX = (120 - (shape[0].length * 30)) / 2;
-                const offsetY = (120 - (shape.length * 30)) / 2;
-                for (let row = 0; row < shape.length; row++) {
-                    for (let col = 0; col < shape[0].length; col++) {
-                        if (shape[row][col]) {
-                            nextCtx.fillStyle = nextPiece.color;
-                            nextCtx.fillRect(offsetX + col*30, offsetY + row*30, 28, 28);
-                            nextCtx.fillStyle = 'rgba(255,255,255,0.45)';
-                            nextCtx.fillRect(offsetX + col*30, offsetY + row*30, 26, 5);
-                        }
-                    }
-                }
-            }
+        // 2. Standings
+        async function loadStandings() {
+            try {
+                const data = await sb('league_id=eq.94&season=eq.2024&order=rank.asc', 'standings');
+                const tbody = document.querySelector('#table-standings tbody');
+                data.forEach(t => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="pos-session">${t.rank}</td>
+                            <td class="team"><img src="${t.team_logo}" alt="" onerror="this.style.display='none'"> ${t.team_name}</td>
+                            <td>${t.played}</td>
+                            <td class="win">${t.win}</td>
+                            <td class="draw">${t.draw}</td>
+                            <td class="loss">${t.lose}</td>
+                            <td class="goals">${t.goals_for}</td>
+                            <td class="loss">${t.goals_against}</td>
+                            <td>${t.goal_diff > 0 ? '+' : ''}${t.goal_diff}</td>
+                            <td class="rating">${t.points}</td>
+                        </tr>`;
+                });
+                hideLoading('loading-standings'); showTable('table-standings');
+            } catch (e) { showError('standings', e.message); }
         }
 
-        function updateUI() {
-            scoreSpan.innerText = score;
-            linesSpan.innerText = totalLines;
+        // 3. Fixture Stats & Player Stats
+        async function loadFixtures() {
+            try {
+                // Team stats
+                const stats = await sb('fixture_id=eq.1232011', 'fixture_stats');
+                const tbody = document.querySelector('#table-fixtures tbody');
+                const home = stats.filter(s => s.is_home);
+                const away = stats.filter(s => !s.is_home);
+                const metricOrder = ['Ball Possession', 'Total Shots', 'Shots on Target', 'Shots off Target', 'Blocked Shots', 'Corner Kicks', 'Offsides', 'Goalkeeper Saves', 'Total Passes', 'Passes Accurate', 'Passes %', 'Expected Goals', 'Goals Prevented', 'Fouls', 'Yellow Cards', 'Red Cards'];
+                metricOrder.forEach(m => {
+                    const h = home.find(s => s.metric === m)?.value || '-';
+                    const a = away.find(s => s.metric === m)?.value || '-';
+                    tbody.innerHTML += `<tr><td>${m}</td><td class="xg">${h}</td><td class="xg">${a}</td></tr>`;
+                });
+                hideLoading('loading-fixtures'); showTable('table-fixtures');
+
+                // Player stats
+                const players = await sb('fixture_id=eq.1232011&team_name=eq.FC Porto', 'player_match_stats');
+                const tbody2 = document.querySelector('#table-player-stats tbody');
+                players.forEach(p => {
+                    tbody2.innerHTML += `
+                        <tr>
+                            <td class="team"><img src="${p.player_photo}" alt="" style="width:20px;height:20px;" onerror="this.style.display='none'"> ${p.player_name}</td>
+                            <td>${p.position}</td>
+                            <td>${p.minutes}'</td>
+                            <td class="rating">${p.rating}</td>
+                            <td class="goals">${p.goals}</td>
+                            <td class="assists">${p.assists}</td>
+                            <td>${p.shots_total} (${p.shots_on_target} alvo)</td>
+                            <td>${p.passes_total} (${p.passes_accuracy}%)</td>
+                            <td>${p.duels_total} (${p.duels_won} ganhos)</td>
+                        </tr>`;
+                });
+                hideLoading('loading-player-stats'); showTable('table-player-stats');
+            } catch (e) { showError('fixtures', e.message); }
         }
 
-        function drawAll() { drawBoard(); drawNext(); updateUI(); }
-
-        function collision(shape, offsetX, offsetY) {
-            for (let row = 0; row < shape.length; row++) {
-                for (let col = 0; col < shape[0].length; col++) {
-                    if (shape[row][col]) {
-                        const x = offsetX + col;
-                        const y = offsetY + row;
-                        if (x < 0 || x >= COLS || y >= ROWS || y < 0) return true;
-                        if (y >= 0 && board[y][x] !== 0) return true;
-                    }
-                }
-            }
-            return false;
+        // 4. Predictions
+        async function loadPredictions() {
+            try {
+                const data = await sb('fixture_id=eq.1232011', 'predictions');
+                if (!data.length) throw new Error('Sem previsões');
+                const p = data[0];
+                const container = document.getElementById('predictions-content');
+                const comp = p.comparison_json || {};
+                container.innerHTML = `
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:16px;">
+                        <div style="background:#1a202c;padding:20px;border-radius:8px;border:1px solid #2d3748;">
+                            <h4 style="color:#9ca3af;margin-bottom:8px;">Vencedor Previsto</h4>
+                            <p style="font-size:1.5rem;font-weight:700;color:#10b981;">${p.winner_name || 'Empate'}</p>
+                        </div>
+                        <div style="background:#1a202c;padding:20px;border-radius:8px;border:1px solid #2d3748;">
+                            <h4 style="color:#9ca3af;margin-bottom:8px;">Percentuais</h4>
+                            <p>Casa: <strong>${p.percent_home}</strong></p>
+                            <p>Empate: <strong>${p.percent_draw}</strong></p>
+                            <p>Fora: <strong>${p.percent_away}</strong></p>
+                        </div>
+                        <div style="background:#1a202c;padding:20px;border-radius:8px;border:1px solid #2d3748;">
+                            <h4 style="color:#9ca3af;margin-bottom:8px;">Conselho</h4>
+                            <p>${p.advice}</p>
+                        </div>
+                    </div>
+                    <table>
+                        <thead><tr><th>Modelo</th><th>Casa</th><th>Fora</th></tr></thead>
+                        <tbody>
+                            <tr><td>Forma Recente</td><td>${comp.form?.home || '-'}</td><td>${comp.form?.away || '-'}</td></tr>
+                            <tr><td>Poisson</td><td>${comp.poisson?.home || '-'}</td><td>${comp.poisson?.away || '-'}</td></tr>
+                            <tr><td>H2H</td><td>${comp.h2h?.home || '-'}</td><td>${comp.h2h?.away || '-'}</td></tr>
+                            <tr><td>Golos Médios</td><td>${comp.goals?.home || '-'}</td><td>${comp.goals?.away || '-'}</td></tr>
+                            <tr><td>Classificado</td><td>${comp.classified?.home || '-'}</td><td>${comp.classified?.away || '-'}</td></tr>
+                        </tbody>
+                    </table>`;
+                hideLoading('loading-predictions');
+                container.style.display = 'block';
+            } catch (e) { showError('predictions', e.message); }
         }
 
-        function mergePiece() {
-            if (!activePiece) return;
-            for (let row = 0; row < activePiece.shape.length; row++) {
-                for (let col = 0; col < activePiece.shape[0].length; col++) {
-                    if (activePiece.shape[row][col]) {
-                        const x = activePiece.x + col;
-                        const y = activePiece.y + row;
-                        if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
-                            board[y][x] = activePiece.color;
-                        }
-                    }
-                }
-            }
-            clearLinesAndScore();
-            spawnNewPiece();
-            drawAll();
-            if (gameOver) { if (fallInterval) clearInterval(fallInterval); fallInterval = null; }
+        // 5. H2H
+        async function loadH2H() {
+            try {
+                const data = await sb('team_home_id=in.(453,525)&team_away_id=in.(453,525)&order=fixture_date.desc&limit=7', 'h2h_matches');
+                const tbody = document.querySelector('#table-h2h tbody');
+                data.forEach(m => {
+                    const isPortoHome = m.home_team_name === 'FC Porto';
+                    const res = `${m.goals_home}-${m.goals_away}`;
+                    const resClass = (isPortoHome && m.goals_home > m.goals_away) || (!isPortoHome && m.goals_away > m.goals_home) ? 'win' :
+                                     m.goals_home === m.goals_away ? 'draw' : 'loss';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${m.fixture_date}</td>
+                            <td>${m.league_name}</td>
+                            <td class="team"><img src="${m.home_team_logo}" alt="" onerror="this.style.display='none'"> ${m.home_team_name}</td>
+                            <td class="team"><img src="${m.away_team_logo}" alt="" onerror="this.style.display='none'"> ${m.away_team_name}</td>
+                            <td class="${resClass}"><strong>${res}</strong></td>
+                        </tr>`;
+                });
+                hideLoading('loading-h2h'); showTable('table-h2h');
+            } catch (e) { showError('h2h', e.message); }
         }
 
-        function clearLinesAndScore() {
-            let rowsCleared = 0;
-            for (let row = ROWS-1; row >= 0; ) {
-                let full = true;
-                for (let col = 0; col < COLS; col++) if (!board[row][col]) { full = false; break; }
-                if (full) {
-                    for (let r = row; r > 0; r--) board[r] = [...board[r-1]];
-                    board[0] = Array(COLS).fill(0);
-                    rowsCleared++;
-                } else row--;
-            }
-            if (rowsCleared > 0) {
-                const points = [0, 40, 100, 300, 1200][rowsCleared] * level;
-                score += points;
-                totalLines += rowsCleared;
-                const newLevel = Math.floor(totalLines / 10) + 1;
-                if (newLevel !== level) {
-                    level = newLevel;
-                    if (fallInterval) { clearInterval(fallInterval); startFallInterval(); }
-                }
-                updateUI();
-            }
+        // 6. Leagues
+        async function loadLeagues() {
+            try {
+                const data = await sb('order=id.asc', 'leagues');
+                const tbody = document.querySelector('#table-leagues tbody');
+                data.forEach(l => {
+                    const cov = l.coverage_json;
+                    const hasStats = cov.fixtures?.statistics_fixtures ? 'Estatísticas ✅' : 'Básica ⚠️';
+                    const hasPlayers = cov.players ? 'Jogadores ✅' : 'Não';
+                    const hasPred = cov.predictions ? 'Previsões ✅' : 'Não';
+                    const hasOdds = cov.odds ? 'Odds ✅' : 'Odds ❌';
+                    const hasInj = cov.injuries ? 'Lesões ✅' : 'Lesões ❌';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${l.id}</td>
+                            <td class="team"><img src="${l.logo}" alt="" onerror="this.style.display='none'"> ${l.name}</td>
+                            <td><span class="badge ${l.type === 'League' ? 'badge-league' : 'badge-cup'}">${l.type}</span></td>
+                            <td>${l.current_season || 'N/A'}</td>
+                            <td>${hasStats} | ${hasPlayers} | ${hasPred} | ${hasOdds} | ${hasInj}</td>
+                        </tr>`;
+                });
+                hideLoading('loading-leagues'); showTable('table-leagues');
+            } catch (e) { showError('leagues', e.message); }
         }
 
-        function spawnNewPiece() {
-            if (!nextPiece) nextPiece = randomPiece();
-            const newPiece = { shape: nextPiece.shape.map(row => [...row]), color: nextPiece.color };
-            nextPiece = randomPiece();
-            const startX = Math.floor((COLS - newPiece.shape[0].length) / 2);
-            activePiece = { shape: newPiece.shape, color: newPiece.color, x: startX, y: 0 };
-            if (collision(activePiece.shape, activePiece.x, activePiece.y)) {
-                gameOver = true;
-                activePiece = null;
-                drawAll();
-                return false;
-            }
-            drawAll();
-            return true;
-        }
-
-        function movePiece(dx, dy) {
-            if (!activePiece || gameOver) return false;
-            const newX = activePiece.x + dx;
-            const newY = activePiece.y + dy;
-            if (!collision(activePiece.shape, newX, newY)) {
-                activePiece.x = newX;
-                activePiece.y = newY;
-                drawAll();
-                return true;
-            } else if (dy === 1) { mergePiece(); drawAll(); return false; }
-            return false;
-        }
-
-        function rotatePiece() {
-            if (!activePiece || gameOver) return;
-            const rotated = activePiece.shape[0].map((_, idx) => activePiece.shape.map(row => row[idx]).reverse());
-            const oldShape = activePiece.shape;
-            activePiece.shape = rotated;
-            if (collision(activePiece.shape, activePiece.x, activePiece.y)) {
-                for (let offset of [-1, 1]) {
-                    if (!collision(rotated, activePiece.x + offset, activePiece.y)) {
-                        activePiece.x += offset;
-                        drawAll();
-                        return;
-                    }
-                }
-                activePiece.shape = oldShape;
-            } else drawAll();
-        }
-
-        function hardDrop() {
-            if (!activePiece || gameOver) return;
-            while (!collision(activePiece.shape, activePiece.x, activePiece.y+1)) activePiece.y++;
-            mergePiece();
-            drawAll();
-        }
-
-        function startFallInterval() {
-            if (fallInterval) clearInterval(fallInterval);
-            fallInterval = setInterval(() => { if (!gameOver && activePiece) movePiece(0,1); }, getDelay());
-        }
-
-        function resetGame() {
-            if (fallInterval) clearInterval(fallInterval);
-            board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-            score = 0; totalLines = 0; level = 1; gameOver = false;
-            updateUI();
-            nextPiece = randomPiece();
-            spawnNewPiece();
-            startFallInterval();
-            drawAll();
-        }
-
-        function handleKey(e) {
-            if (gameOver && e.code !== 'Space' && e.code !== 'KeyR') { e.preventDefault(); return; }
-            const key = e.key;
-            switch(key) {
-                case 'ArrowLeft': e.preventDefault(); movePiece(-1,0); break;
-                case 'ArrowRight': e.preventDefault(); movePiece(1,0); break;
-                case 'ArrowDown': e.preventDefault(); movePiece(0,1); break;
-                case 'ArrowUp': e.preventDefault(); rotatePiece(); break;
-                case ' ': case 'Space': e.preventDefault(); hardDrop(); break;
-                case 'r': case 'R': resetGame(); break;
-                default: break;
-            }
-        }
-
-        window.addEventListener('keydown', handleKey);
-        resetBtn.addEventListener('click', resetGame);
-        resetGame();
-    })();
-</script>
+        // Initialize
+        loadTopScorers();
+        loadStandings();
+        loadFixtures();
+        loadPredictions();
+        loadH2H();
+        loadLeagues();
+    </script>
 </body>
 </html>
