@@ -407,6 +407,17 @@
                 <button class="tab" data-tab="predictions">Predictions</button>
                 <button class="tab" data-tab="h2h">Head-to-Head</button>
                 <button class="tab" data-tab="leagues">Leagues</button>
+                <button class="tab" data-tab="odds">Game Odds</button>
+                <button class="tab" data-tab="best-odds">Best Odds</button>
+                <button class="tab" data-tab="events">Match Events</button>
+                <button class="tab" data-tab="lineups">Lineups</button>
+                <button class="tab" data-tab="team-stats">Team Stats</button>
+                <button class="tab" data-tab="discipline">Top Cards</button>
+                <button class="tab" data-tab="transfers">Transfers</button>
+                <button class="tab" data-tab="coaches">Coaches</button>
+                <button class="tab" data-tab="sidelined">Sidelined</button>
+                <button class="tab" data-tab="bookmakers">Bookmakers</button>
+                <button class="tab" data-tab="markets">Markets</button>
             </div>
         </nav>
 
@@ -527,6 +538,225 @@
                     <div class="loading" id="loading-leagues">A carregar ligas</div>
                     <table id="table-leagues" style="display:none;">
                         <thead><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Época</th><th>Cobertura</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Game Odds -->
+            <div class="panel" id="odds">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Game Odds · Match Winner por Bookmaker</div>
+                            <div class="data-source">odds_snapshots — sample 10 fixtures × ~10 bookmakers</div>
+                        </div>
+                        <div class="card-tag">1X2 grid</div>
+                    </div>
+                    <div class="loading" id="loading-odds">A carregar odds</div>
+                    <div style="overflow-x:auto;">
+                        <table id="table-odds" style="display:none;">
+                            <thead><tr><th>Fixture</th><th>Bookmaker</th><th>Home</th><th>Draw</th><th>Away</th><th>Update</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Odds (positive EV vs avg) -->
+            <div class="panel" id="best-odds">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Best Odds · Match Winner por Fixture</div>
+                            <div class="data-source">odds_snapshots — best price per outcome</div>
+                        </div>
+                        <div class="card-tag">Top of book</div>
+                    </div>
+                    <div class="loading" id="loading-best-odds">A calcular best odds</div>
+                    <table id="table-best-odds" style="display:none;">
+                        <thead><tr><th>Fixture ID</th><th>Best Home</th><th>@</th><th>Best Draw</th><th>@</th><th>Best Away</th><th>@</th><th>Margin %</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Match Events -->
+            <div class="panel" id="events">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Match Events · Braga 1-1 Famalicão (2023-08-11)</div>
+                            <div class="data-source">fixture_events fixture_id=1063478</div>
+                        </div>
+                        <div class="card-tag">Timeline</div>
+                    </div>
+                    <div class="loading" id="loading-events">A carregar eventos</div>
+                    <table id="table-events" style="display:none;">
+                        <thead><tr><th>Min</th><th>Equipa</th><th>Tipo</th><th>Detalhe</th><th>Jogador</th><th>Assist</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Lineups -->
+            <div class="panel" id="lineups">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Lineups · Braga vs Famalicão (2023-08-11)</div>
+                            <div class="data-source">fixture_lineups fixture_id=1063478</div>
+                        </div>
+                        <div class="card-tag">XI + Bench</div>
+                    </div>
+                    <div class="loading" id="loading-lineups">A carregar onzes</div>
+                    <div id="lineups-content" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Team Stats -->
+            <div class="panel" id="team-stats">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Team Stats · Arouca · Primeira Liga 2023/24</div>
+                            <div class="data-source">team_stats team_id=240</div>
+                        </div>
+                        <div class="card-tag">Form / Goals / Lineups</div>
+                    </div>
+                    <div class="loading" id="loading-team-stats">A carregar estatísticas</div>
+                    <div id="team-stats-content" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Discipline (top yellow + red) -->
+            <div class="panel" id="discipline">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Top Cartões Amarelos · 2023/24</div>
+                            <div class="data-source">top_yellow</div>
+                        </div>
+                        <div class="card-tag">Discipline</div>
+                    </div>
+                    <div class="loading" id="loading-yellow">A carregar amarelos</div>
+                    <table id="table-yellow" style="display:none;">
+                        <thead><tr><th>#</th><th>Jogador</th><th>Clube</th><th>🟨</th><th>🟥</th><th>J</th><th>Min</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Top Cartões Vermelhos · 2023/24</div>
+                            <div class="data-source">top_red</div>
+                        </div>
+                        <div class="card-tag">Red cards</div>
+                    </div>
+                    <div class="loading" id="loading-red">A carregar vermelhos</div>
+                    <table id="table-red" style="display:none;">
+                        <thead><tr><th>#</th><th>Jogador</th><th>Clube</th><th>🟥</th><th>🟨</th><th>J</th><th>Min</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Top Assists · 2023/24</div>
+                            <div class="data-source">top_assists</div>
+                        </div>
+                        <div class="card-tag">Playmakers</div>
+                    </div>
+                    <div class="loading" id="loading-assists">A carregar assistências</div>
+                    <table id="table-assists" style="display:none;">
+                        <thead><tr><th>#</th><th>Jogador</th><th>Clube</th><th>A</th><th>G</th><th>J</th><th>Min</th><th>Rating</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Transfers -->
+            <div class="panel" id="transfers">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Transferências · SC Braga (todas)</div>
+                            <div class="data-source">transfers team=240</div>
+                        </div>
+                        <div class="card-tag">In / Out</div>
+                    </div>
+                    <div class="loading" id="loading-transfers">A carregar transferências</div>
+                    <table id="table-transfers" style="display:none;">
+                        <thead><tr><th>Data</th><th>Jogador</th><th>Tipo</th><th>De</th><th>→</th><th>Para</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Coaches -->
+            <div class="panel" id="coaches">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Coaches · SC Braga</div>
+                            <div class="data-source">coaches team=240</div>
+                        </div>
+                        <div class="card-tag">Staff</div>
+                    </div>
+                    <div class="loading" id="loading-coaches">A carregar treinadores</div>
+                    <div id="coaches-content" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Sidelined -->
+            <div class="panel" id="sidelined">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Histórico de Lesões · player_id=276</div>
+                            <div class="data-source">player_sidelined</div>
+                        </div>
+                        <div class="card-tag">Injuries log</div>
+                    </div>
+                    <div class="loading" id="loading-sidelined">A carregar histórico</div>
+                    <table id="table-sidelined" style="display:none;">
+                        <thead><tr><th>Tipo</th><th>Início</th><th>Fim</th><th>Duração</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bookmakers catalog -->
+            <div class="panel" id="bookmakers">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Bookmakers · Catálogo API-Football</div>
+                            <div class="data-source">bookmakers (32)</div>
+                        </div>
+                        <div class="card-tag">Reference</div>
+                    </div>
+                    <div class="loading" id="loading-bookmakers">A carregar bookmakers</div>
+                    <table id="table-bookmakers" style="display:none;">
+                        <thead><tr><th>ID</th><th>Nome</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bet markets catalog -->
+            <div class="panel" id="markets">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">Mercados · Catálogo API-Football</div>
+                            <div class="data-source">bet_markets (336)</div>
+                        </div>
+                        <div class="card-tag">Reference</div>
+                    </div>
+                    <div class="loading" id="loading-markets">A carregar mercados</div>
+                    <table id="table-markets" style="display:none;">
+                        <thead><tr><th>ID</th><th>Mercado</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -750,6 +980,320 @@
     loadPredictions();
     loadH2H();
     loadLeagues();
+    loadOdds();
+    loadBestOdds();
+    loadEvents();
+    loadLineups();
+    loadTeamStats();
+    loadDiscipline();
+    loadTransfers();
+    loadCoaches();
+    loadSidelined();
+    loadBookmakers();
+    loadMarkets();
+
+    // ========================================================
+    // 7. Game Odds — Match Winner por bookmaker (todos os fixtures)
+    // ========================================================
+    async function loadOdds() {
+        try {
+            const data = await sb('bet_id=eq.1&order=fixture_id.asc,bookmaker_id.asc&limit=2000', 'odds_snapshots');
+            // Pivot: fixture × bookmaker → {Home, Draw, Away}
+            const grid = {};
+            data.forEach(r => {
+                const k = `${r.fixture_id}|${r.bookmaker_id}`;
+                if (!grid[k]) grid[k] = { fixture_id: r.fixture_id, bookmaker_name: r.bookmaker_name, update: r.api_update };
+                grid[k][r.outcome] = r.odd;
+            });
+            const tbody = document.querySelector('#table-odds tbody');
+            const rows = Object.values(grid).slice(0, 200);
+            rows.forEach(r => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span style="font-family:'JetBrains Mono',monospace;color:var(--txt-3);">${r.fixture_id}</span></td>
+                        <td class="team-name">${r.bookmaker_name}</td>
+                        <td class="xg">${r.Home || '-'}</td>
+                        <td class="draw">${r.Draw || '-'}</td>
+                        <td class="xg">${r.Away || '-'}</td>
+                        <td style="font-size:11px;color:var(--txt-3);">${r.update ? r.update.slice(0,16).replace('T',' ') : '-'}</td>
+                    </tr>`;
+            });
+            hideLoading('loading-odds'); showTable('table-odds');
+        } catch (e) { showError('odds', e.message); }
+    }
+
+    // ========================================================
+    // 8. Best Odds — top of book + book margin
+    // ========================================================
+    async function loadBestOdds() {
+        try {
+            const data = await sb('bet_id=eq.1&limit=2000', 'odds_snapshots');
+            const byFix = {};
+            data.forEach(r => {
+                if (!byFix[r.fixture_id]) byFix[r.fixture_id] = { Home: [], Draw: [], Away: [] };
+                if (byFix[r.fixture_id][r.outcome]) byFix[r.fixture_id][r.outcome].push({ bm: r.bookmaker_name, odd: parseFloat(r.odd) });
+            });
+            const tbody = document.querySelector('#table-best-odds tbody');
+            Object.keys(byFix).slice(0, 50).forEach(fid => {
+                const f = byFix[fid];
+                const best = (arr) => arr.length ? arr.reduce((a,b) => b.odd > a.odd ? b : a) : { bm:'-', odd:null };
+                const bH = best(f.Home), bD = best(f.Draw), bA = best(f.Away);
+                let margin = '-';
+                if (bH.odd && bD.odd && bA.odd) {
+                    const m = ((1/bH.odd + 1/bD.odd + 1/bA.odd) - 1) * 100;
+                    margin = m.toFixed(2);
+                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span style="font-family:'JetBrains Mono',monospace;color:var(--txt-3);">${fid}</span></td>
+                        <td class="goals">${bH.odd ?? '-'}</td>
+                        <td style="font-size:11px;color:var(--txt-2);">${bH.bm}</td>
+                        <td class="draw">${bD.odd ?? '-'}</td>
+                        <td style="font-size:11px;color:var(--txt-2);">${bD.bm}</td>
+                        <td class="goals">${bA.odd ?? '-'}</td>
+                        <td style="font-size:11px;color:var(--txt-2);">${bA.bm}</td>
+                        <td><span class="rating">${margin}</span></td>
+                    </tr>`;
+            });
+            hideLoading('loading-best-odds'); showTable('table-best-odds');
+        } catch (e) { showError('best-odds', e.message); }
+    }
+
+    // ========================================================
+    // 9. Match Events — timeline
+    // ========================================================
+    async function loadEvents() {
+        try {
+            const data = await sb('fixture_id=eq.1063478&order=minute.asc', 'fixture_events');
+            const tbody = document.querySelector('#table-events tbody');
+            const ico = (t, d) => {
+                if (t === 'Goal') return d === 'Normal Goal' ? '⚽' : (d === 'Penalty' ? '🎯' : '⚽');
+                if (t === 'Card') return d === 'Yellow Card' ? '🟨' : '🟥';
+                if (t === 'subst') return '🔄';
+                if (t === 'Var') return '📺';
+                return '·';
+            };
+            data.forEach(e => {
+                const min = e.minute + (e.extra ? `+${e.extra}` : '');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span style="font-family:'JetBrains Mono',monospace;font-weight:700;">${min}'</span></td>
+                        <td class="team-name">${e.team_name}</td>
+                        <td>${ico(e.type, e.detail)} ${e.type}</td>
+                        <td style="color:var(--txt-2);">${e.detail || ''}</td>
+                        <td class="team-name">${e.player_name || '-'}</td>
+                        <td style="color:var(--txt-3);">${e.assist_name || '-'}</td>
+                    </tr>`;
+            });
+            hideLoading('loading-events'); showTable('table-events');
+        } catch (e) { showError('events', e.message); }
+    }
+
+    // ========================================================
+    // 10. Lineups — XI + bench por equipa
+    // ========================================================
+    async function loadLineups() {
+        try {
+            const data = await sb('fixture_id=eq.1063478', 'fixture_lineups');
+            const c = document.getElementById('lineups-content');
+            c.innerHTML = data.map(l => {
+                const xi = (l.start_xi || []).map(x => `<li><span style="font-family:'JetBrains Mono',monospace;color:var(--acc);">#${x.player.number}</span> <strong>${x.player.name}</strong> <span style="color:var(--txt-3);">${x.player.pos}</span></li>`).join('');
+                const sub = (l.substitutes || []).map(x => `<li><span style="font-family:'JetBrains Mono',monospace;color:var(--txt-3);">#${x.player.number}</span> ${x.player.name} <span style="color:var(--txt-3);">${x.player.pos}</span></li>`).join('');
+                return `
+                    <div style="display:grid;grid-template-columns:1fr;gap:14px;padding:16px;border-bottom:1px solid var(--line);">
+                        <div>
+                            <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${l.team_name}</div>
+                            <div style="font-size:11px;color:var(--txt-3);margin-bottom:10px;">Formação <span style="color:var(--acc);font-family:'JetBrains Mono',monospace;">${l.formation}</span> · Treinador: ${l.coach_name}</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                                <div><div style="font-size:10px;text-transform:uppercase;color:var(--txt-3);margin-bottom:6px;letter-spacing:0.06em;">Onze inicial</div><ul style="list-style:none;padding:0;font-size:12px;">${xi}</ul></div>
+                                <div><div style="font-size:10px;text-transform:uppercase;color:var(--txt-3);margin-bottom:6px;letter-spacing:0.06em;">Banco</div><ul style="list-style:none;padding:0;font-size:12px;">${sub}</ul></div>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+            hideLoading('loading-lineups');
+            c.style.display = 'block';
+        } catch (e) { showError('lineups', e.message); }
+    }
+
+    // ========================================================
+    // 11. Team Stats — form + golos + médias
+    // ========================================================
+    async function loadTeamStats() {
+        try {
+            const data = await sb('team_id=eq.240&league_id=eq.94&season=eq.2023', 'team_stats');
+            if (!data.length) throw new Error('Sem dados de equipa');
+            const t = data[0]; const r = t.raw || {};
+            const formChips = (t.form || '').split('').map(c => {
+                const cls = c==='W' ? 'win' : c==='D' ? 'draw' : 'loss';
+                return `<span class="${cls}" style="display:inline-block;width:18px;height:18px;text-align:center;line-height:18px;border-radius:3px;font-size:10px;font-weight:700;margin-right:2px;">${c}</span>`;
+            }).join('');
+            const c = document.getElementById('team-stats-content');
+            const fix = r.fixtures || {};
+            const goals = r.goals || {};
+            c.innerHTML = `
+                <div style="padding:16px;">
+                    <div style="margin-bottom:14px;">
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--txt-3);margin-bottom:6px;letter-spacing:0.06em;">Forma (últimos jogos)</div>
+                        <div>${formChips}</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+                        <div class="pred-card"><h4>Jogos</h4><p class="big">${fix.played?.total ?? '-'}</p><p>${fix.played?.home}H / ${fix.played?.away}A</p></div>
+                        <div class="pred-card"><h4>Vitórias</h4><p class="big" style="color:var(--ok);">${fix.wins?.total ?? '-'}</p><p>${fix.wins?.home}H / ${fix.wins?.away}A</p></div>
+                        <div class="pred-card"><h4>Empates</h4><p class="big" style="color:var(--info);">${fix.draws?.total ?? '-'}</p></div>
+                        <div class="pred-card"><h4>Derrotas</h4><p class="big" style="color:var(--err);">${fix.loses?.total ?? '-'}</p></div>
+                        <div class="pred-card"><h4>GM</h4><p class="big" style="color:var(--acc);">${goals.for?.total?.total ?? '-'}</p><p>média ${goals.for?.average?.total ?? '-'}</p></div>
+                        <div class="pred-card"><h4>GS</h4><p class="big" style="color:var(--err);">${goals.against?.total?.total ?? '-'}</p><p>média ${goals.against?.average?.total ?? '-'}</p></div>
+                    </div>
+                </div>`;
+            hideLoading('loading-team-stats');
+            c.style.display = 'block';
+        } catch (e) { showError('team-stats', e.message); }
+    }
+
+    // ========================================================
+    // 12. Discipline — yellow + red + assists
+    // ========================================================
+    async function loadDiscipline() {
+        try {
+            const yel = await sb('order=rank.asc&limit=20', 'top_yellow');
+            const tbY = document.querySelector('#table-yellow tbody');
+            yel.forEach(p => tbY.innerHTML += `
+                <tr>
+                    <td class="rank">${p.rank}</td>
+                    <td class="team"><img src="${p.player_photo}" alt="" onerror="this.style.display='none'"><span class="team-name">${p.player_name}</span></td>
+                    <td>${p.team_name||'-'}</td>
+                    <td class="loss">${p.yellow}</td>
+                    <td>${p.red}</td>
+                    <td>${p.appearances}</td>
+                    <td>${p.minutes}</td>
+                </tr>`);
+            hideLoading('loading-yellow'); showTable('table-yellow');
+
+            const red = await sb('order=rank.asc&limit=20', 'top_red');
+            const tbR = document.querySelector('#table-red tbody');
+            red.forEach(p => tbR.innerHTML += `
+                <tr>
+                    <td class="rank">${p.rank}</td>
+                    <td class="team"><img src="${p.player_photo}" alt="" onerror="this.style.display='none'"><span class="team-name">${p.player_name}</span></td>
+                    <td>${p.team_name||'-'}</td>
+                    <td class="loss">${p.red}</td>
+                    <td>${p.yellow}</td>
+                    <td>${p.appearances}</td>
+                    <td>${p.minutes}</td>
+                </tr>`);
+            hideLoading('loading-red'); showTable('table-red');
+
+            const ass = await sb('order=rank.asc&limit=20', 'top_assists');
+            const tbA = document.querySelector('#table-assists tbody');
+            ass.forEach(p => tbA.innerHTML += `
+                <tr>
+                    <td class="rank">${p.rank}</td>
+                    <td class="team"><img src="${p.player_photo}" alt="" onerror="this.style.display='none'"><span class="team-name">${p.player_name}</span></td>
+                    <td>${p.team_name||'-'}</td>
+                    <td class="assists">${p.assists}</td>
+                    <td class="goals">${p.goals}</td>
+                    <td>${p.appearances}</td>
+                    <td>${p.minutes}</td>
+                    <td><span class="rating">${p.rating ?? '-'}</span></td>
+                </tr>`);
+            hideLoading('loading-assists'); showTable('table-assists');
+        } catch (e) { showError('discipline', e.message); }
+    }
+
+    // ========================================================
+    // 13. Transfers
+    // ========================================================
+    async function loadTransfers() {
+        try {
+            const data = await sb('order=transfer_date.desc&limit=200', 'transfers');
+            const tbody = document.querySelector('#table-transfers tbody');
+            data.forEach(t => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-family:'JetBrains Mono',monospace;color:var(--txt-2);">${t.transfer_date || '-'}</td>
+                        <td class="team-name">${t.player_name}</td>
+                        <td><span class="badge ${t.type==='Loan'?'badge-cup':'badge-league'}">${t.type || '-'}</span></td>
+                        <td style="color:var(--txt-2);">${t.team_out_name || '-'}</td>
+                        <td style="color:var(--acc);">→</td>
+                        <td>${t.team_in_name || '-'}</td>
+                    </tr>`;
+            });
+            hideLoading('loading-transfers'); showTable('table-transfers');
+        } catch (e) { showError('transfers', e.message); }
+    }
+
+    // ========================================================
+    // 14. Coaches
+    // ========================================================
+    async function loadCoaches() {
+        try {
+            const data = await sb('team_id=eq.240', 'coaches');
+            const c = document.getElementById('coaches-content');
+            c.innerHTML = data.map(co => `
+                <div style="display:flex;gap:16px;padding:16px;border-bottom:1px solid var(--line);">
+                    <img src="${co.photo}" style="width:64px;height:64px;border-radius:50%;border:1px solid var(--line);" onerror="this.style.display='none'">
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:700;margin-bottom:2px;">${co.name}</div>
+                        <div style="font-size:11px;color:var(--txt-3);">${co.nationality} · ${co.age}a · ${co.height || '-'} / ${co.weight || '-'}</div>
+                        <div style="font-size:11px;color:var(--txt-2);margin-top:4px;">Equipa: <span class="team-name">${co.team_name}</span></div>
+                    </div>
+                </div>`).join('');
+            hideLoading('loading-coaches');
+            c.style.display = 'block';
+        } catch (e) { showError('coaches', e.message); }
+    }
+
+    // ========================================================
+    // 15. Sidelined
+    // ========================================================
+    async function loadSidelined() {
+        try {
+            const data = await sb('player_id=eq.276&order=start_date.desc', 'player_sidelined');
+            const tbody = document.querySelector('#table-sidelined tbody');
+            data.forEach(s => {
+                let dur = '-';
+                if (s.start_date && s.end_date) {
+                    const d1 = new Date(s.start_date), d2 = new Date(s.end_date);
+                    dur = Math.round((d2 - d1) / 86400000) + 'd';
+                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.type}</td>
+                        <td style="font-family:'JetBrains Mono',monospace;color:var(--txt-2);">${s.start_date || '-'}</td>
+                        <td style="font-family:'JetBrains Mono',monospace;color:var(--txt-2);">${s.end_date || '-'}</td>
+                        <td><span class="rating">${dur}</span></td>
+                    </tr>`;
+            });
+            hideLoading('loading-sidelined'); showTable('table-sidelined');
+        } catch (e) { showError('sidelined', e.message); }
+    }
+
+    // ========================================================
+    // 16. Bookmakers catalog
+    // ========================================================
+    async function loadBookmakers() {
+        try {
+            const data = await sb('order=id.asc', 'bookmakers');
+            const tbody = document.querySelector('#table-bookmakers tbody');
+            data.forEach(b => tbody.innerHTML += `
+                <tr><td><span style="font-family:'JetBrains Mono',monospace;color:var(--txt-3);">${b.id}</span></td><td class="team-name">${b.name}</td></tr>`);
+            hideLoading('loading-bookmakers'); showTable('table-bookmakers');
+        } catch (e) { showError('bookmakers', e.message); }
+    }
+
+    // ========================================================
+    // 17. Bet markets catalog
+    // ========================================================
+    async function loadMarkets() {
+        try {
+            const data = await sb('order=id.asc&limit=400', 'bet_markets');
+            const tbody = document.querySelector('#table-markets tbody');
+            data.forEach(b => tbody.innerHTML += `
+                <tr><td><span style="font-family:'JetBrains Mono',monospace;color:var(--txt-3);">${b.id}</span></td><td>${b.name}</td></tr>`);
+            hideLoading('loading-markets'); showTable('table-markets');
+        } catch (e) { showError('markets', e.message); }
+    }
 </script>
 </body>
 </html>
