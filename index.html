@@ -419,6 +419,7 @@
                 <button class="tab" data-tab="bookmakers">Bookmakers</button>
                 <button class="tab" data-tab="markets">Markets</button>
                 <button class="tab" data-tab="game-page">⭐ Game Page (1 jogo)</button>
+                <button class="tab" data-tab="match-wide">📊 Match Features (1 linha/jogo)</button>
             </div>
         </nav>
 
@@ -777,6 +778,32 @@
                 </div>
 
                 <div id="raw-tables"></div>
+            </div>
+
+            <!-- Match Features: 1 linha por jogo, todas as features para backtesting -->
+            <div class="panel" id="match-wide">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">📊 Match Features · 1 linha por jogo</div>
+                            <div class="data-source">match_features_pt · Liga Portugal + Liga 2 + Liga 3 + Taça · 5 épocas · pronto para backtesting</div>
+                        </div>
+                        <div class="card-tag" id="mw-count">…</div>
+                    </div>
+                    <div style="padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--bg-2);border-bottom:1px solid var(--line);">
+                        <select id="mw-league" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;"></select>
+                        <select id="mw-season" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;"></select>
+                        <input id="mw-search" placeholder="Filtrar equipa…" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:6px 10px;border-radius:4px;font-size:12px;flex:1;min-width:160px;">
+                        <label style="font-size:11px;color:var(--txt-2);"><input type="checkbox" id="mw-xg-only"> Só com xG</label>
+                        <button id="mw-export" style="background:var(--acc);color:#000;border:none;padding:6px 14px;border-radius:4px;font-weight:700;font-size:11px;cursor:pointer;">⬇ CSV</button>
+                    </div>
+                    <div style="overflow:auto;max-height:75vh;">
+                        <table id="mw-table" style="font-size:10px;white-space:nowrap;">
+                            <thead><tr id="mw-head"></tr></thead>
+                            <tbody id="mw-body"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1391,6 +1418,120 @@
                     </tr>
                 </tbody>
             </table>`;
+    }
+
+    // ========================================================
+    // 19. Match Features — 1 linha por jogo (backtesting)
+    // ========================================================
+    let MW_DATA = [], MW_COLS = [];
+    loadMatchWide();
+    async function loadMatchWide() {
+        // Pull all rows in chunks of 1000 (PostgREST default cap)
+        let all = [], from = 0;
+        while (true) {
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/match_features_pt?order=match_date.desc.nullslast&limit=1000&offset=${from}`, {
+                headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            const chunk = await r.json();
+            if (!Array.isArray(chunk) || chunk.length === 0) break;
+            all = all.concat(chunk);
+            if (chunk.length < 1000) break;
+            from += 1000;
+        }
+        MW_DATA = all;
+        MW_COLS = all.length ? Object.keys(all[0]) : [];
+
+        // Populate filters
+        const leagues = [...new Set(all.map(r => r.league))].sort();
+        const seasons = [...new Set(all.map(r => r.season))].sort().reverse();
+        const lSel = document.getElementById('mw-league');
+        const sSel = document.getElementById('mw-season');
+        lSel.innerHTML = '<option value="">Todas as ligas</option>' + leagues.map(l => `<option>${l}</option>`).join('');
+        sSel.innerHTML = '<option value="">Todas as épocas</option>' + seasons.map(s => `<option>${s}</option>`).join('');
+
+        // Build header
+        document.getElementById('mw-head').innerHTML = MW_COLS.map(c =>
+            `<th style="position:sticky;top:0;background:var(--bg-2);z-index:2;cursor:pointer;" onclick="mwSort('${c}')">${c}</th>`
+        ).join('');
+
+        // Wire events
+        ['mw-league','mw-season','mw-search','mw-xg-only'].forEach(id => {
+            document.getElementById(id).addEventListener('input', renderMW);
+            document.getElementById(id).addEventListener('change', renderMW);
+        });
+        document.getElementById('mw-export').addEventListener('click', exportMW);
+
+        renderMW();
+    }
+
+    let MW_SORT = { col:'match_date', dir:-1 };
+    window.mwSort = (col) => {
+        if (MW_SORT.col === col) MW_SORT.dir *= -1;
+        else { MW_SORT = { col, dir:-1 }; }
+        renderMW();
+    };
+
+    function filterMW() {
+        const lg = document.getElementById('mw-league').value;
+        const sn = document.getElementById('mw-season').value;
+        const q = document.getElementById('mw-search').value.toLowerCase();
+        const xgOnly = document.getElementById('mw-xg-only').checked;
+        return MW_DATA.filter(r => {
+            if (lg && r.league !== lg) return false;
+            if (sn && r.season !== sn) return false;
+            if (xgOnly && r.xg_home_ft == null) return false;
+            if (q && !((r.home||'').toLowerCase().includes(q) || (r.away||'').toLowerCase().includes(q))) return false;
+            return true;
+        });
+    }
+
+    function renderMW() {
+        const filtered = filterMW();
+        // sort
+        const { col, dir } = MW_SORT;
+        filtered.sort((a,b) => {
+            const av = a[col], bv = b[col];
+            if (av == null && bv == null) return 0;
+            if (av == null) return 1;
+            if (bv == null) return -1;
+            if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
+            return String(av).localeCompare(String(bv)) * dir;
+        });
+        const rows = filtered.slice(0, 500); // viewport cap
+        document.getElementById('mw-count').textContent =
+            `${filtered.length.toLocaleString()} jogos · ${MW_COLS.length} cols · mostrando ${rows.length}`;
+
+        const fmt = (v, c) => {
+            if (v == null) return '<span style="color:var(--txt-3);font-style:italic;">·</span>';
+            if (c === 'ft_result') {
+                const cls = v==='H'?'goals':v==='A'?'loss':'';
+                return `<span class="${cls}" style="font-weight:700;">${v}</span>`;
+            }
+            if (c.startsWith('y_')) return v ? '<span class="goals">1</span>' : '<span style="color:var(--txt-3);">0</span>';
+            if (c.startsWith('p_fair_')) return `<span style="color:var(--info);">${(v*100).toFixed(1)}%</span>`;
+            if (typeof v === 'number') {
+                if (Number.isInteger(v)) return v;
+                return v.toFixed(2);
+            }
+            const s = String(v);
+            return s.length > 30 ? s.slice(0,30)+'…' : s;
+        };
+        document.getElementById('mw-body').innerHTML = rows.map(r =>
+            `<tr>${MW_COLS.map(c => `<td style="padding:3px 6px;">${fmt(r[c], c)}</td>`).join('')}</tr>`
+        ).join('');
+    }
+
+    function exportMW() {
+        const filtered = filterMW();
+        const esc = v => v == null ? '' : (/[",\n]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : String(v));
+        const csv = [MW_COLS.join(',')].concat(
+            filtered.map(r => MW_COLS.map(c => esc(r[c])).join(','))
+        ).join('\n');
+        const blob = new Blob([csv], { type:'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `match_features_pt_${Date.now()}.csv`; a.click();
+        URL.revokeObjectURL(url);
     }
 </script>
 </body>
