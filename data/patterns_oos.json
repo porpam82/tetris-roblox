@@ -1,0 +1,82 @@
+[
+ {
+  "name": "FORM[H=mid,A=good]\u2192BTTS YES",
+  "train_roi": 15.19,
+  "test_roi": 4.55,
+  "train_n": 288,
+  "test_n": 96,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "FORM[H=good,A=hot]\u2192OVER 2.5",
+  "train_roi": 17.42,
+  "test_roi": 31.84,
+  "train_n": 78,
+  "test_n": 25,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "COMBO[underdog_home_hot]\u2192BTTS YES",
+  "train_roi": 5.84,
+  "test_roi": 47.07,
+  "train_n": 101,
+  "test_n": 30,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "LEAGUE[PT2|Top3 home]\u2192HOME",
+  "train_roi": 13.57,
+  "test_roi": 7.58,
+  "train_n": 155,
+  "test_n": 38,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "COMBO[h_huge_fav_in_form]\u2192HOME",
+  "train_roi": 6.36,
+  "test_roi": 1.85,
+  "train_n": 218,
+  "test_n": 47,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "BTTSTEND[both low]\u2192BTTS YES",
+  "train_roi": 17.52,
+  "test_roi": 13.81,
+  "train_n": 93,
+  "test_n": 31,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "O25TEND[both low]\u2192BTTS YES",
+  "train_roi": 11.82,
+  "test_roi": 12.41,
+  "train_n": 154,
+  "test_n": 41,
+  "status": "OOS_PASS"
+ },
+ {
+  "name": "POS[Top3 home vs Bot3]\u2192HOME",
+  "train_roi": 20.12,
+  "test_roi": -31.54,
+  "train_n": 65,
+  "test_n": 13,
+  "status": "OOS_FAIL_small_test"
+ },
+ {
+  "name": "POS[Top3 home]\u2192HOME",
+  "train_roi": 8.29,
+  "test_roi": -3.8,
+  "train_n": 438,
+  "test_n": 110,
+  "status": "OOS_FAIL"
+ },
+ {
+  "name": "O25TEND[both high]\u2192OVER 2.5",
+  "train_roi": 23.09,
+  "test_roi": -8.75,
+  "train_n": 74,
+  "test_n": 20,
+  "status": "OOS_FAIL_small_test"
+ }
+]

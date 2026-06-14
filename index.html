@@ -425,6 +425,7 @@
                 <button class="tab" data-tab="hold-heatmap">💰 Hold/Vig Heatmap</button>
                 <button class="tab" data-tab="backtest">📈 Backtest</button>
                 <button class="tab" data-tab="trading-tools">🧮 Trading Tools</button>
+                <button class="tab" data-tab="patterns">🔬 Patterns (1055 testados)</button>
             </div>
         </nav>
 
@@ -1000,6 +1001,74 @@
                 .ttool-btn{width:100%;background:var(--acc);color:#000;border:none;padding:7px;border-radius:4px;font-weight:700;font-size:11px;cursor:pointer;margin-top:6px;}
                 .ttool-result{margin-top:10px;padding:10px;background:var(--bg-3);border-radius:4px;font-size:11px;color:var(--acc);font-family:monospace;white-space:pre;min-height:20px;}
                 </style>
+            </div>
+
+            <!-- 🔬 Patterns -->
+            <div class="panel" id="patterns">
+                <div class="card" style="background:#1a2a3a;border:1px solid #4d8aff;margin-bottom:14px;">
+                    <div style="padding:12px 14px;color:#9bbfff;font-size:12px;line-height:1.5;">
+                        🔬 <b>Pattern discovery</b> · 1055 hipóteses testadas sobre 3896 jogos PT1/2/3 (5 épocas).
+                        Filtro padrão: ROI ≥ -5% (343 patterns sobreviventes).
+                        <b>Marcador OOS:</b> validados em hold-out 2025-26 (não mostrados aqui = OOS pendente).
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:14px;">
+                    <div class="card-head"><div class="card-title">📊 Resumo</div></div>
+                    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;font-size:12px;">
+                        <div><div style="color:var(--txt-2);font-size:10px;">Total testados</div><div style="font-size:22px;font-weight:700;color:var(--txt);">1055</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">ROI ≥ -5%</div><div style="font-size:22px;font-weight:700;color:var(--txt);" id="pa-qual">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">ROI > 0%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">ROI > +10%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos10">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">Significativos (t≥1.5)</div><div style="font-size:22px;font-weight:700;color:var(--acc);" id="pa-sig">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">OOS-validated</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-oos">—</div></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:14px;">
+                    <div class="card-head">
+                        <div><div class="card-title">✅ OOS-validated picks (train-test split)</div>
+                        <div class="data-source">Train: 2021-25 · Test: 2025-26 · Ambos ROI > 0</div></div>
+                    </div>
+                    <div style="overflow:auto;padding:14px;">
+                        <table id="pa-oos-table" style="font-size:12px;">
+                            <thead><tr><th>Pattern</th><th>Train ROI</th><th>Test ROI</th><th>N train</th><th>N test</th><th>Status</th></tr></thead>
+                            <tbody id="pa-oos-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div><div class="card-title">🔍 Pattern explorer</div>
+                        <div class="data-source">Filtros: família · mercado · ROI mínimo · N mínimo</div></div>
+                    </div>
+                    <div style="padding:14px;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;align-items:center;">
+                        <label>Família:
+                            <select id="pa-fam" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;font-size:11px;">
+                                <option value="">Todas</option>
+                            </select>
+                        </label>
+                        <label>Mercado:
+                            <select id="pa-mkt" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;font-size:11px;">
+                                <option value="">Todos</option>
+                            </select>
+                        </label>
+                        <label>ROI mínimo: <input type="number" id="pa-roi" value="0" step="1" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;width:60px;font-size:11px;"></label>
+                        <label>N mínimo: <input type="number" id="pa-n" value="50" step="10" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;width:60px;font-size:11px;"></label>
+                        <label>t-stat min: <input type="number" id="pa-t" value="0" step="0.1" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;width:60px;font-size:11px;"></label>
+                        <button onclick="filterPatterns()" style="background:var(--acc);color:#000;border:none;padding:6px 12px;border-radius:3px;font-weight:700;cursor:pointer;font-size:11px;">Filtrar</button>
+                        <span id="pa-count" style="color:var(--txt-2);"></span>
+                    </div>
+                    <div style="overflow:auto;padding:14px;max-height:600px;">
+                        <table id="pa-table" style="font-size:11px;">
+                            <thead><tr>
+                                <th>Pattern</th><th>Mkt</th><th>Side</th><th>N</th><th>Hit %</th><th>Avg Odd</th><th>ROI %</th><th>95% CI</th><th>t-stat</th>
+                            </tr></thead>
+                            <tbody id="pa-body"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2008,6 +2077,93 @@
     };
 
     // Tab activation triggers (lazy load)
+    let _patternsData = null;
+    async function loadPatterns() {
+        try {
+            const [patResp, oosResp] = await Promise.all([
+                fetch('data/patterns.json'),
+                fetch('data/patterns_oos.json'),
+            ]);
+            if (!patResp.ok || !oosResp.ok) throw new Error('fetch failed');
+            const pat = await patResp.json();
+            const oos = await oosResp.json();
+            _patternsData = pat.patterns;
+
+            // Summary stats
+            document.getElementById('pa-qual').textContent = pat.meta.qualified_count;
+            document.getElementById('pa-pos').textContent = pat.meta.positive_count;
+            document.getElementById('pa-pos10').textContent = pat.patterns.filter(p=>p.roi_pct>10).length;
+            document.getElementById('pa-sig').textContent = pat.meta.significant_count;
+            document.getElementById('pa-oos').textContent = oos.filter(o=>o.status==='OOS_PASS').length;
+
+            // OOS table
+            const oosBody = document.getElementById('pa-oos-body');
+            oosBody.innerHTML = '';
+            oos.sort((a,b)=>(b.test_roi||0)-(a.test_roi||0)).forEach(r=>{
+                const tr = document.createElement('tr');
+                const trainCol = r.train_roi>=0 ? '#7eff7e' : '#ff7e7e';
+                const testCol = r.test_roi>=0 ? '#7eff7e' : '#ff7e7e';
+                const stCol = r.status==='OOS_PASS' ? '#7eff7e' : '#ff7e7e';
+                tr.innerHTML = `<td>${r.name}</td>
+                    <td style="color:${trainCol};text-align:right;">${r.train_roi>=0?'+':''}${r.train_roi.toFixed(2)}%</td>
+                    <td style="color:${testCol};text-align:right;font-weight:700;">${r.test_roi>=0?'+':''}${r.test_roi.toFixed(2)}%</td>
+                    <td style="text-align:right;">${r.train_n}</td>
+                    <td style="text-align:right;">${r.test_n}</td>
+                    <td style="color:${stCol};">${r.status}</td>`;
+                oosBody.appendChild(tr);
+            });
+
+            // Family/Market dropdowns
+            const fams = [...new Set(pat.patterns.map(p=>p.name.split('[')[0]))].sort();
+            const mkts = [...new Set(pat.patterns.map(p=>p.market))].sort();
+            const famSel = document.getElementById('pa-fam');
+            fams.forEach(f=>{ const o=document.createElement('option'); o.value=f; o.textContent=f; famSel.appendChild(o); });
+            const mktSel = document.getElementById('pa-mkt');
+            mkts.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; mktSel.appendChild(o); });
+
+            filterPatterns();
+        } catch (e) {
+            const body = document.getElementById('pa-body');
+            body.innerHTML = `<tr><td colspan="9" style="color:#ff7e7e;padding:20px;">Erro a carregar patterns.json: ${e.message}. Garantir que data/patterns.json existe.</td></tr>`;
+        }
+    }
+
+    window.filterPatterns = function() {
+        if (!_patternsData) return;
+        const fam = document.getElementById('pa-fam').value;
+        const mkt = document.getElementById('pa-mkt').value;
+        const minRoi = parseFloat(document.getElementById('pa-roi').value) || -999;
+        const minN = parseInt(document.getElementById('pa-n').value) || 0;
+        const minT = parseFloat(document.getElementById('pa-t').value) || -999;
+        const filtered = _patternsData.filter(p =>
+            (!fam || p.name.startsWith(fam)) &&
+            (!mkt || p.market === mkt) &&
+            p.roi_pct >= minRoi &&
+            p.N >= minN &&
+            p.t_stat >= minT
+        );
+        const body = document.getElementById('pa-body');
+        body.innerHTML = '';
+        filtered.slice(0, 200).forEach(p=>{
+            const tr = document.createElement('tr');
+            const roiCol = p.roi_pct >= 0 ? '#7eff7e' : '#ff7e7e';
+            const tCol = p.t_stat >= 1.5 ? '#7eff7e' : (p.t_stat >= 1 ? '#ffd97e' : 'var(--txt-2)');
+            const nameClean = p.name.split('|')[0];
+            const sideOnly = p.name.split('|')[1] || '';
+            tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${nameClean}</td>
+                <td>${p.market}</td>
+                <td>${p.side}</td>
+                <td style="text-align:right;">${p.N}</td>
+                <td style="text-align:right;">${p.hit_pct.toFixed(1)}%</td>
+                <td style="text-align:right;">${p.avg_odd.toFixed(2)}</td>
+                <td style="text-align:right;color:${roiCol};font-weight:700;">${p.roi_pct>=0?'+':''}${p.roi_pct.toFixed(2)}%</td>
+                <td style="text-align:right;font-size:9px;">[${p.roi_lo>=0?'+':''}${p.roi_lo.toFixed(1)},${p.roi_hi>=0?'+':''}${p.roi_hi.toFixed(1)}]</td>
+                <td style="text-align:right;color:${tCol};">${p.t_stat>=0?'+':''}${p.t_stat.toFixed(2)}</td>`;
+            body.appendChild(tr);
+        });
+        document.getElementById('pa-count').textContent = `${filtered.length} matches (mostrando ${Math.min(200, filtered.length)})`;
+    };
+
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const id = tab.dataset.tab;
@@ -2015,6 +2171,7 @@
             if (id === 'pinnacle' && !window._fpLoaded) { window._fpLoaded = true; loadFairProbs(); }
             if (id === 'hold-heatmap' && !window._hhLoaded) { window._hhLoaded = true; loadHoldHeatmap(); }
             if (id === 'backtest' && !window._btLoaded) { window._btLoaded = true; loadBacktest(); }
+            if (id === 'patterns' && !window._paLoaded) { window._paLoaded = true; loadPatterns(); }
         });
     });
 </script>
