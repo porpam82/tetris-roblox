@@ -425,7 +425,7 @@
                 <button class="tab" data-tab="hold-heatmap">💰 Hold/Vig Heatmap</button>
                 <button class="tab" data-tab="backtest">📈 Backtest</button>
                 <button class="tab" data-tab="trading-tools">🧮 Trading Tools</button>
-                <button class="tab" data-tab="patterns">🔬 Patterns (1055 testados)</button>
+                <button class="tab" data-tab="calibration">📐 Calibration</button>
             </div>
         </nav>
 
@@ -1003,94 +1003,57 @@
                 </style>
             </div>
 
-            <!-- 🔬 Patterns -->
-            <div class="panel" id="patterns">
-                <div class="card" style="background:#1a2a3a;border:1px solid #4d8aff;margin-bottom:14px;">
-                    <div style="padding:12px 14px;color:#9bbfff;font-size:12px;line-height:1.5;">
-                        🔬 <b>Pattern discovery</b> · <span id="pa-total">4007</span> hipóteses testadas sobre 3896 jogos PT1/2/3 (5 épocas).
-                        Filtro: ROI ≥ -5%. Família <b>BOT3VS</b> agora cobre bot3 vs todos (top3, mid, bot3, bot6).
-                        <b>OOS:</b> hold-out 2025-26 (status PASS = train ROI>0 e test ROI>0).
+            <!-- 📐 Calibration -->
+            <div class="panel" id="calibration">
+                <div class="card" style="background:#2a1a1a;border:1px solid #ff6464;margin-bottom:14px;">
+                    <div style="padding:12px 14px;color:#ffb0b0;font-size:12px;line-height:1.5;">
+                        🛑 <b>Resultado matemático honesto.</b> Em <span id="ca-n">109,893</span> jogos OOS sobre 38 ligas (Pinnacle closing devigged Shin), 
+                        <b>Dixon-Coles MLE não bate o mercado em nenhuma liga (0/38)</b>. Tabs <b>Patterns</b>/<b>Backtest</b> 
+                        de versões anteriores baseavam-se em ROI histórico — <b>não sobrevivem</b> a teste matemático rigoroso. 
+                        Stacking [DC + Mercado] regista vitória estatisticamente significante mas economicamente irrelevante 
+                        (ROI edge-following continua negativo após overround). <b>Pinnacle closing é a fronteira informacional;</b>
+                        edge real só seria possível com odds opening (CLV).
                     </div>
                 </div>
 
                 <div class="card" style="margin-bottom:14px;">
-                    <div class="card-head"><div class="card-title">📊 Resumo</div></div>
-                    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;font-size:12px;">
-                        <div><div style="color:var(--txt-2);font-size:10px;">Total testados</div><div style="font-size:22px;font-weight:700;color:var(--txt);" id="pa-total-stat">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">ROI ≥ -5%</div><div style="font-size:22px;font-weight:700;color:var(--txt);" id="pa-qual">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">ROI > 0%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">ROI > +10%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos10">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">ROI > +20%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos20">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">Sig t≥1.5</div><div style="font-size:22px;font-weight:700;color:var(--acc);" id="pa-sig">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">Sig t≥2.0</div><div style="font-size:22px;font-weight:700;color:var(--acc);" id="pa-sig20">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">OOS-PASS</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-oos">—</div></div>
-                    </div>
+                    <div class="card-head"><div class="card-title">📊 Sumário global</div>
+                    <div class="data-source">2012–2026 · 38 ligas · Pinnacle closing devigged Shin · DC MLE walk-forward com time-decay ξ=0.0065</div></div>
+                    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;font-size:12px;" id="ca-summary"></div>
                 </div>
 
                 <div class="card" style="margin-bottom:14px;">
-                    <div class="card-head"><div class="card-title">🎲 Monte Carlo · Bankroll Kelly fracionário (top OOS-PASS)</div>
-                    <div class="data-source">5000 sims · 1 época · bankroll inicial €100 · stake = full Kelly × frac</div></div>
-                    <div style="overflow:auto;padding:14px;max-height:480px;">
-                        <table id="pa-mc-table" style="font-size:11px;">
-                            <thead><tr>
-                                <th rowspan="2" style="vertical-align:bottom;">Pattern</th>
-                                <th rowspan="2" style="vertical-align:bottom;">Hit %</th>
-                                <th rowspan="2" style="vertical-align:bottom;">Avg odd</th>
-                                <th rowspan="2" style="vertical-align:bottom;">Full Kelly</th>
-                                <th colspan="3" style="text-align:center;border-bottom:1px solid var(--line);">Kelly 10%</th>
-                                <th colspan="3" style="text-align:center;border-bottom:1px solid var(--line);">Kelly 25%</th>
-                                <th colspan="3" style="text-align:center;border-bottom:1px solid var(--line);">Kelly 50%</th>
-                            </tr><tr>
-                                <th>p50</th><th>p05</th><th>2x %</th>
-                                <th>p50</th><th>p05</th><th>2x %</th>
-                                <th>p50</th><th>p05</th><th>2x %</th>
-                            </tr></thead>
-                            <tbody id="pa-mc-body"><tr><td colspan="13" style="color:var(--txt-2);text-align:center;padding:20px;">A carregar simulações…</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-bottom:14px;">
-                    <div class="card-head">
-                        <div><div class="card-title">✅ OOS-validated picks (train-test split)</div>
-                        <div class="data-source">Train: 2021-25 · Test: 2025-26 · Ambos ROI > 0</div></div>
-                    </div>
+                    <div class="card-head"><div class="card-title">🧪 Stacking + Isotonic (test set 30%)</div>
+                    <div class="data-source">Train: 76,925 jogos (2012–2022) · Test: 32,968 jogos (2022–2026)</div></div>
                     <div style="overflow:auto;padding:14px;">
-                        <table id="pa-oos-table" style="font-size:12px;">
-                            <thead><tr><th>Pattern</th><th>Train ROI</th><th>Test ROI</th><th>N train</th><th>N test</th><th>Status</th></tr></thead>
-                            <tbody id="pa-oos-body"></tbody>
+                        <table id="ca-stack-table" style="font-size:12px;">
+                            <thead><tr><th>Modelo</th><th>Log-loss</th><th>Brier</th><th>ECE</th><th>Δ vs Pinnacle</th></tr></thead>
+                            <tbody id="ca-stack-body"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-head">
-                        <div><div class="card-title">🔍 Pattern explorer</div>
-                        <div class="data-source">Filtros: família · mercado · ROI mínimo · N mínimo</div></div>
+                        <div><div class="card-title">🌍 Δ log-loss DC − Mercado por liga</div>
+                        <div class="data-source">IC95% bootstrap (2000 reps) · negativo = DC bate mercado · positivo = mercado bate DC</div></div>
                     </div>
                     <div style="padding:14px;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;align-items:center;">
-                        <label>Família:
-                            <select id="pa-fam" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;font-size:11px;">
-                                <option value="">Todas</option>
+                        <label>Ordenar por:
+                            <select id="ca-sort" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;font-size:11px;">
+                                <option value="delta_ll">Δ log-loss (asc)</option>
+                                <option value="n_games">N jogos</option>
+                                <option value="mkt_overround">Overround</option>
                             </select>
                         </label>
-                        <label>Mercado:
-                            <select id="pa-mkt" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;font-size:11px;">
-                                <option value="">Todos</option>
-                            </select>
-                        </label>
-                        <label>ROI mínimo: <input type="number" id="pa-roi" value="0" step="1" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;width:60px;font-size:11px;"></label>
-                        <label>N mínimo: <input type="number" id="pa-n" value="50" step="10" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;width:60px;font-size:11px;"></label>
-                        <label>t-stat min: <input type="number" id="pa-t" value="0" step="0.1" style="background:var(--bg-3);color:var(--txt);border:1px solid var(--line);padding:4px;width:60px;font-size:11px;"></label>
-                        <button onclick="filterPatterns()" style="background:var(--acc);color:#000;border:none;padding:6px 12px;border-radius:3px;font-weight:700;cursor:pointer;font-size:11px;">Filtrar</button>
-                        <span id="pa-count" style="color:var(--txt-2);"></span>
+                        <span id="ca-count" style="color:var(--txt-2);"></span>
                     </div>
-                    <div style="overflow:auto;padding:14px;max-height:600px;">
-                        <table id="pa-table" style="font-size:11px;">
+                    <div style="overflow:auto;padding:14px;max-height:700px;">
+                        <table id="ca-table" style="font-size:11px;">
                             <thead><tr>
-                                <th>Pattern</th><th>Mkt</th><th>Side</th><th>N</th><th>Hit %</th><th>Avg Odd</th><th>ROI %</th><th>95% CI</th><th>t-stat</th>
+                                <th>Liga</th><th>N</th><th>DC ll</th><th>Mkt ll</th><th>Δ ll</th><th>IC95%</th><th>DC Brier</th><th>Mkt Brier</th><th>Overround</th><th>ROI@5%</th><th>Veredicto</th>
                             </tr></thead>
-                            <tbody id="pa-body"></tbody>
+                            <tbody id="ca-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -2102,135 +2065,104 @@
     };
 
     // Tab activation triggers (lazy load)
-    let _patternsData = null;
-    async function loadPatterns() {
+    async function loadCalibration() {
         try {
-            const [patResp, oosResp, mcResp] = await Promise.all([
-                fetch('data/patterns.json'),
-                fetch('data/patterns_oos.json'),
-                fetch('data/montecarlo.json'),
+            const [calResp, stkResp] = await Promise.all([
+                fetch('data/calibration.json'),
+                fetch('data/stacking.json'),
             ]);
-            if (!patResp.ok || !oosResp.ok) throw new Error('fetch failed');
-            const pat = await patResp.json();
-            const oosRaw = await oosResp.json();
-            const mc = mcResp.ok ? await mcResp.json() : null;
-            _patternsData = pat.patterns;
+            if (!calResp.ok) throw new Error('calibration.json fetch failed: ' + calResp.status);
+            const cal = await calResp.json();
+            const stk = stkResp.ok ? await stkResp.json() : null;
 
-            // Normalize OOS shape (new wraps in {meta, oos_results}, old was a list)
-            const oos = Array.isArray(oosRaw) ? oosRaw : (oosRaw.oos_results || []);
+            // Global summary cards
+            const g = cal.global;
+            const sumDiv = document.getElementById('ca-summary');
+            const stat = (label, value, color = 'var(--txt)', sub = '') => `
+                <div>
+                    <div style="color:var(--txt-2);font-size:10px;">${label}</div>
+                    <div style="font-size:20px;font-weight:700;color:${color};">${value}</div>
+                    ${sub ? `<div style="color:var(--txt-2);font-size:9px;">${sub}</div>` : ''}
+                </div>`;
+            sumDiv.innerHTML =
+                stat('Jogos OOS', g.n_games_total.toLocaleString('pt-PT')) +
+                stat('Ligas testadas', `${g.n_leagues}`) +
+                stat('DC bate mercado', `${g.leagues_dc_beats_mkt}/${g.n_leagues}`, '#ff7e7e', 'IC95 hi < 0') +
+                stat('Mercado bate DC', `${g.leagues_mkt_beats_dc}/${g.n_leagues}`, '#7eff7e', 'IC95 lo > 0') +
+                stat('Δ log-loss global', `+${g.global_delta_ll.toFixed(4)}`, '#ff7e7e') +
+                stat('DC log-loss', g.global_dc_logloss.toFixed(4)) +
+                stat('Mercado log-loss', g.global_mkt_logloss.toFixed(4), '#7eff7e') +
+                stat('DC ECE', g.global_dc_ece.toFixed(4), '#ff7e7e', `${(g.global_dc_ece/g.global_mkt_ece).toFixed(1)}× pior`) +
+                stat('Mercado ECE', g.global_mkt_ece.toFixed(4), '#7eff7e') +
+                stat('Edge >5% (global)', `${g.edge_strategy_5pct_global_n.toLocaleString('pt-PT')} bets`, 'var(--txt)') +
+                stat('ROI edge >5%', `${g.edge_strategy_5pct_global_roi.toFixed(2)}%`, '#ff7e7e');
 
-            // Summary stats
-            document.getElementById('pa-total').textContent = pat.meta.total_tested.toLocaleString('pt-PT');
-            document.getElementById('pa-total-stat').textContent = pat.meta.total_tested.toLocaleString('pt-PT');
-            document.getElementById('pa-qual').textContent = pat.meta.qualified_count;
-            document.getElementById('pa-pos').textContent = pat.meta.positive_count;
-            document.getElementById('pa-pos10').textContent = pat.meta.roi_gt_10_count ?? pat.patterns.filter(p=>p.roi_pct>10).length;
-            document.getElementById('pa-pos20').textContent = pat.meta.roi_gt_20_count ?? pat.patterns.filter(p=>p.roi_pct>20).length;
-            document.getElementById('pa-sig').textContent = pat.meta.sig_t15_count ?? pat.meta.significant_count ?? '—';
-            document.getElementById('pa-sig20').textContent = pat.meta.sig_t20_count ?? '—';
-            document.getElementById('pa-oos').textContent = oos.filter(o=>o.status==='PASS' || o.status==='OOS_PASS').length;
-
-            // OOS table
-            const oosBody = document.getElementById('pa-oos-body');
-            oosBody.innerHTML = '';
-            oos.sort((a,b)=>(b.test_roi||0)-(a.test_roi||0)).forEach(r=>{
-                const tr = document.createElement('tr');
-                const trainCol = r.train_roi>=0 ? '#7eff7e' : '#ff7e7e';
-                const testCol = r.test_roi>=0 ? '#7eff7e' : '#ff7e7e';
-                const isPass = (r.status==='PASS' || r.status==='OOS_PASS');
-                const stCol = isPass ? '#7eff7e' : '#ff7e7e';
-                const stTxt = isPass ? 'PASS' : (r.status==='FAIL' || r.status==='OOS_FAIL' ? 'FAIL' : r.status);
-                tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${r.name}</td>
-                    <td style="color:${trainCol};text-align:right;">${r.train_roi>=0?'+':''}${r.train_roi.toFixed(2)}%</td>
-                    <td style="color:${testCol};text-align:right;font-weight:700;">${r.test_roi>=0?'+':''}${r.test_roi.toFixed(2)}%</td>
-                    <td style="text-align:right;">${r.train_n}</td>
-                    <td style="text-align:right;">${r.test_n}</td>
-                    <td style="color:${stCol};font-weight:700;">${stTxt}</td>`;
-                oosBody.appendChild(tr);
-            });
-
-            // Monte Carlo table
-            if (mc && mc.results && mc.results.length) {
-                const mcBody = document.getElementById('pa-mc-body');
-                mcBody.innerHTML = '';
-                const fmt = v => '€' + Math.round(v);
-                const colorVal = (v, base=100) => v >= base*1.5 ? '#7eff7e' : (v >= base ? 'var(--txt)' : '#ff7e7e');
-                mc.results.forEach(r => {
+            // Stacking table
+            if (stk) {
+                const baseLL = stk['Pinnacle Shin (market)'].logloss;
+                const stkBody = document.getElementById('ca-stack-body');
+                stkBody.innerHTML = '';
+                Object.entries(stk).forEach(([name, m]) => {
+                    const dll = m.logloss - baseLL;
+                    const dCol = dll < 0 ? '#7eff7e' : (dll > 0.001 ? '#ff7e7e' : 'var(--txt-2)');
+                    const isMkt = name.includes('market');
                     const tr = document.createElement('tr');
-                    const s10 = r.sim.frac_0_1 || r.sim['frac_0.1'];
-                    const s25 = r.sim.frac_0_25 || r.sim['frac_0.25'];
-                    const s50 = r.sim.frac_0_5 || r.sim['frac_0.5'];
-                    tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${r.name}</td>
-                        <td style="text-align:right;">${r.hit_rate.toFixed(1)}%</td>
-                        <td style="text-align:right;">${r.avg_odd.toFixed(2)}</td>
-                        <td style="text-align:right;color:var(--acc);">${r.kelly_full_pct.toFixed(1)}%</td>
-                        <td style="text-align:right;color:${colorVal(s10.final_p50)};">${fmt(s10.final_p50)}</td>
-                        <td style="text-align:right;color:${colorVal(s10.final_p05)};">${fmt(s10.final_p05)}</td>
-                        <td style="text-align:right;">${s10.prob_2x}%</td>
-                        <td style="text-align:right;color:${colorVal(s25.final_p50)};">${fmt(s25.final_p50)}</td>
-                        <td style="text-align:right;color:${colorVal(s25.final_p05)};">${fmt(s25.final_p05)}</td>
-                        <td style="text-align:right;font-weight:700;">${s25.prob_2x}%</td>
-                        <td style="text-align:right;color:${colorVal(s50.final_p50)};">${fmt(s50.final_p50)}</td>
-                        <td style="text-align:right;color:${colorVal(s50.final_p05)};">${fmt(s50.final_p05)}</td>
-                        <td style="text-align:right;font-weight:700;">${s50.prob_2x}%</td>`;
-                    mcBody.appendChild(tr);
+                    tr.innerHTML = `<td style="font-family:monospace;font-size:11px;">${name}</td>
+                        <td style="text-align:right;">${m.logloss.toFixed(4)}</td>
+                        <td style="text-align:right;">${m.brier.toFixed(4)}</td>
+                        <td style="text-align:right;">${m.ece.toFixed(4)}</td>
+                        <td style="text-align:right;color:${dCol};font-weight:700;">${isMkt ? '— (baseline)' : (dll>=0?'+':'') + dll.toFixed(5)}</td>`;
+                    stkBody.appendChild(tr);
                 });
-            } else {
-                document.getElementById('pa-mc-body').innerHTML = '<tr><td colspan="13" style="color:var(--txt-2);text-align:center;padding:20px;">montecarlo.json não disponível.</td></tr>';
             }
 
-            // Family/Market dropdowns
-            const fams = [...new Set(pat.patterns.map(p=>p.family || p.name.split('[')[0]))].sort();
-            const mkts = [...new Set(pat.patterns.map(p=>p.market))].sort();
-            const famSel = document.getElementById('pa-fam');
-            famSel.innerHTML = '<option value="">Todas</option>';
-            fams.forEach(f=>{ const o=document.createElement('option'); o.value=f; o.textContent=f; famSel.appendChild(o); });
-            const mktSel = document.getElementById('pa-mkt');
-            mktSel.innerHTML = '<option value="">Todos</option>';
-            mkts.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; mktSel.appendChild(o); });
+            // Per-league table
+            window._calLeagues = cal.leagues;
+            renderCalibrationTable('delta_ll');
 
-            filterPatterns();
+            const sortSel = document.getElementById('ca-sort');
+            sortSel.addEventListener('change', () => renderCalibrationTable(sortSel.value));
         } catch (e) {
-            const body = document.getElementById('pa-body');
-            body.innerHTML = `<tr><td colspan="9" style="color:#ff7e7e;padding:20px;">Erro a carregar patterns.json: ${e.message}</td></tr>`;
+            document.getElementById('ca-body').innerHTML =
+                `<tr><td colspan="11" style="color:#ff7e7e;padding:20px;">Erro a carregar calibration.json: ${e.message}</td></tr>`;
         }
     }
 
-    window.filterPatterns = function() {
-        if (!_patternsData) return;
-        const fam = document.getElementById('pa-fam').value;
-        const mkt = document.getElementById('pa-mkt').value;
-        const minRoi = parseFloat(document.getElementById('pa-roi').value) || -999;
-        const minN = parseInt(document.getElementById('pa-n').value) || 0;
-        const minT = parseFloat(document.getElementById('pa-t').value) || -999;
-        const filtered = _patternsData.filter(p =>
-            (!fam || (p.family||p.name).startsWith(fam)) &&
-            (!mkt || p.market === mkt) &&
-            p.roi_pct >= minRoi &&
-            p.N >= minN &&
-            (p.t_stat ?? 0) >= minT
-        );
-        const body = document.getElementById('pa-body');
+    function renderCalibrationTable(sortKey) {
+        const leagues = window._calLeagues;
+        if (!leagues) return;
+        const sorted = [...leagues].sort((a, b) => {
+            if (sortKey === 'n_games' || sortKey === 'mkt_overround') return b[sortKey] - a[sortKey];
+            return a[sortKey] - b[sortKey];
+        });
+        const body = document.getElementById('ca-body');
         body.innerHTML = '';
-        filtered.slice(0, 200).forEach(p=>{
+        sorted.forEach(l => {
             const tr = document.createElement('tr');
-            const roiCol = p.roi_pct >= 0 ? '#7eff7e' : '#ff7e7e';
-            const t = p.t_stat ?? 0;
-            const tCol = t >= 1.5 ? '#7eff7e' : (t >= 1 ? '#ffd97e' : 'var(--txt-2)');
-            const lo = p.roi_lo ?? 0, hi = p.roi_hi ?? 0;
-            tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${p.name}</td>
-                <td>${p.market}</td>
-                <td>${p.side||''}</td>
-                <td style="text-align:right;">${p.N}</td>
-                <td style="text-align:right;">${p.hit_pct.toFixed(1)}%</td>
-                <td style="text-align:right;">${p.avg_odd.toFixed(2)}</td>
-                <td style="text-align:right;color:${roiCol};font-weight:700;">${p.roi_pct>=0?'+':''}${p.roi_pct.toFixed(2)}%</td>
-                <td style="text-align:right;font-size:9px;">[${lo>=0?'+':''}${lo.toFixed(1)},${hi>=0?'+':''}${hi.toFixed(1)}]</td>
-                <td style="text-align:right;color:${tCol};">${t>=0?'+':''}${t.toFixed(2)}</td>`;
+            const dCol = l.delta_ll < 0 ? '#7eff7e' : '#ff7e7e';
+            let verd, vCol;
+            if (l.ll_ic95_hi < 0) { verd = '🟢 DC bate'; vCol = '#7eff7e'; }
+            else if (l.ll_ic95_lo > 0) { verd = '🔴 Mkt bate'; vCol = '#ff7e7e'; }
+            else { verd = '⚪ tie'; vCol = 'var(--txt-2)'; }
+            const roiTxt = l.roi_5pct !== null && l.roi_5pct !== undefined
+                ? `${l.roi_5pct>=0?'+':''}${l.roi_5pct.toFixed(2)}%`
+                : '—';
+            const roiCol = (l.roi_5pct ?? -1) >= 0 ? '#7eff7e' : '#ff7e7e';
+            tr.innerHTML = `<td style="font-weight:600;">${l.league_key}</td>
+                <td style="text-align:right;">${l.n_games.toLocaleString('pt-PT')}</td>
+                <td style="text-align:right;">${l.dc_logloss.toFixed(4)}</td>
+                <td style="text-align:right;">${l.mkt_logloss.toFixed(4)}</td>
+                <td style="text-align:right;color:${dCol};font-weight:700;">${l.delta_ll>=0?'+':''}${l.delta_ll.toFixed(4)}</td>
+                <td style="text-align:right;font-size:10px;">[${l.ll_ic95_lo>=0?'+':''}${l.ll_ic95_lo.toFixed(4)}, ${l.ll_ic95_hi>=0?'+':''}${l.ll_ic95_hi.toFixed(4)}]</td>
+                <td style="text-align:right;">${l.dc_brier.toFixed(4)}</td>
+                <td style="text-align:right;">${l.mkt_brier.toFixed(4)}</td>
+                <td style="text-align:right;">${l.mkt_overround.toFixed(2)}%</td>
+                <td style="text-align:right;color:${roiCol};font-size:10px;">${roiTxt} <span style="color:var(--txt-2);">(${l.n_bets_5pct||0})</span></td>
+                <td style="color:${vCol};font-weight:700;">${verd}</td>`;
             body.appendChild(tr);
         });
-        document.getElementById('pa-count').textContent = `${filtered.length} matches (mostrando ${Math.min(200, filtered.length)})`;
-    };
+        document.getElementById('ca-count').textContent = `${sorted.length} ligas`;
+    }
 
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -2239,7 +2171,7 @@
             if (id === 'pinnacle' && !window._fpLoaded) { window._fpLoaded = true; loadFairProbs(); }
             if (id === 'hold-heatmap' && !window._hhLoaded) { window._hhLoaded = true; loadHoldHeatmap(); }
             if (id === 'backtest' && !window._btLoaded) { window._btLoaded = true; loadBacktest(); }
-            if (id === 'patterns' && !window._paLoaded) { window._paLoaded = true; loadPatterns(); }
+            if (id === 'calibration' && !window._caLoaded) { window._caLoaded = true; loadCalibration(); }
         });
     });
 </script>

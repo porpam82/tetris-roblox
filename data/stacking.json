@@ -1,0 +1,27 @@
+{
+  "Dixon-Coles (raw)": {
+    "logloss": 1.0347,
+    "brier": 0.62,
+    "ece": 0.0243
+  },
+  "Pinnacle Shin (market)": {
+    "logloss": 0.9969,
+    "brier": 0.5959,
+    "ece": 0.0075
+  },
+  "Pinnacle + Isotonic": {
+    "logloss": 0.9992,
+    "brier": 0.596,
+    "ece": 0.0058
+  },
+  "Stacking [DC+Market]": {
+    "logloss": 0.9966,
+    "brier": 0.5957,
+    "ece": 0.0067
+  },
+  "Stacking + Isotonic": {
+    "logloss": 1.0005,
+    "brier": 0.5959,
+    "ece": 0.0064
+  }
+}
