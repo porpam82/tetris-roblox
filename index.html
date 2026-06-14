@@ -1007,21 +1007,46 @@
             <div class="panel" id="patterns">
                 <div class="card" style="background:#1a2a3a;border:1px solid #4d8aff;margin-bottom:14px;">
                     <div style="padding:12px 14px;color:#9bbfff;font-size:12px;line-height:1.5;">
-                        🔬 <b>Pattern discovery</b> · 1055 hipóteses testadas sobre 3896 jogos PT1/2/3 (5 épocas).
-                        Filtro padrão: ROI ≥ -5% (343 patterns sobreviventes).
-                        <b>Marcador OOS:</b> validados em hold-out 2025-26 (não mostrados aqui = OOS pendente).
+                        🔬 <b>Pattern discovery</b> · <span id="pa-total">4007</span> hipóteses testadas sobre 3896 jogos PT1/2/3 (5 épocas).
+                        Filtro: ROI ≥ -5%. Família <b>BOT3VS</b> agora cobre bot3 vs todos (top3, mid, bot3, bot6).
+                        <b>OOS:</b> hold-out 2025-26 (status PASS = train ROI>0 e test ROI>0).
                     </div>
                 </div>
 
                 <div class="card" style="margin-bottom:14px;">
                     <div class="card-head"><div class="card-title">📊 Resumo</div></div>
-                    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;font-size:12px;">
-                        <div><div style="color:var(--txt-2);font-size:10px;">Total testados</div><div style="font-size:22px;font-weight:700;color:var(--txt);">1055</div></div>
+                    <div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;font-size:12px;">
+                        <div><div style="color:var(--txt-2);font-size:10px;">Total testados</div><div style="font-size:22px;font-weight:700;color:var(--txt);" id="pa-total-stat">—</div></div>
                         <div><div style="color:var(--txt-2);font-size:10px;">ROI ≥ -5%</div><div style="font-size:22px;font-weight:700;color:var(--txt);" id="pa-qual">—</div></div>
                         <div><div style="color:var(--txt-2);font-size:10px;">ROI > 0%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos">—</div></div>
                         <div><div style="color:var(--txt-2);font-size:10px;">ROI > +10%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos10">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">Significativos (t≥1.5)</div><div style="font-size:22px;font-weight:700;color:var(--acc);" id="pa-sig">—</div></div>
-                        <div><div style="color:var(--txt-2);font-size:10px;">OOS-validated</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-oos">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">ROI > +20%</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-pos20">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">Sig t≥1.5</div><div style="font-size:22px;font-weight:700;color:var(--acc);" id="pa-sig">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">Sig t≥2.0</div><div style="font-size:22px;font-weight:700;color:var(--acc);" id="pa-sig20">—</div></div>
+                        <div><div style="color:var(--txt-2);font-size:10px;">OOS-PASS</div><div style="font-size:22px;font-weight:700;color:#7eff7e;" id="pa-oos">—</div></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:14px;">
+                    <div class="card-head"><div class="card-title">🎲 Monte Carlo · Bankroll Kelly fracionário (top OOS-PASS)</div>
+                    <div class="data-source">5000 sims · 1 época · bankroll inicial €100 · stake = full Kelly × frac</div></div>
+                    <div style="overflow:auto;padding:14px;max-height:480px;">
+                        <table id="pa-mc-table" style="font-size:11px;">
+                            <thead><tr>
+                                <th rowspan="2" style="vertical-align:bottom;">Pattern</th>
+                                <th rowspan="2" style="vertical-align:bottom;">Hit %</th>
+                                <th rowspan="2" style="vertical-align:bottom;">Avg odd</th>
+                                <th rowspan="2" style="vertical-align:bottom;">Full Kelly</th>
+                                <th colspan="3" style="text-align:center;border-bottom:1px solid var(--line);">Kelly 10%</th>
+                                <th colspan="3" style="text-align:center;border-bottom:1px solid var(--line);">Kelly 25%</th>
+                                <th colspan="3" style="text-align:center;border-bottom:1px solid var(--line);">Kelly 50%</th>
+                            </tr><tr>
+                                <th>p50</th><th>p05</th><th>2x %</th>
+                                <th>p50</th><th>p05</th><th>2x %</th>
+                                <th>p50</th><th>p05</th><th>2x %</th>
+                            </tr></thead>
+                            <tbody id="pa-mc-body"><tr><td colspan="13" style="color:var(--txt-2);text-align:center;padding:20px;">A carregar simulações…</td></tr></tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -2080,21 +2105,30 @@
     let _patternsData = null;
     async function loadPatterns() {
         try {
-            const [patResp, oosResp] = await Promise.all([
+            const [patResp, oosResp, mcResp] = await Promise.all([
                 fetch('data/patterns.json'),
                 fetch('data/patterns_oos.json'),
+                fetch('data/montecarlo.json'),
             ]);
             if (!patResp.ok || !oosResp.ok) throw new Error('fetch failed');
             const pat = await patResp.json();
-            const oos = await oosResp.json();
+            const oosRaw = await oosResp.json();
+            const mc = mcResp.ok ? await mcResp.json() : null;
             _patternsData = pat.patterns;
 
+            // Normalize OOS shape (new wraps in {meta, oos_results}, old was a list)
+            const oos = Array.isArray(oosRaw) ? oosRaw : (oosRaw.oos_results || []);
+
             // Summary stats
+            document.getElementById('pa-total').textContent = pat.meta.total_tested.toLocaleString('pt-PT');
+            document.getElementById('pa-total-stat').textContent = pat.meta.total_tested.toLocaleString('pt-PT');
             document.getElementById('pa-qual').textContent = pat.meta.qualified_count;
             document.getElementById('pa-pos').textContent = pat.meta.positive_count;
-            document.getElementById('pa-pos10').textContent = pat.patterns.filter(p=>p.roi_pct>10).length;
-            document.getElementById('pa-sig').textContent = pat.meta.significant_count;
-            document.getElementById('pa-oos').textContent = oos.filter(o=>o.status==='OOS_PASS').length;
+            document.getElementById('pa-pos10').textContent = pat.meta.roi_gt_10_count ?? pat.patterns.filter(p=>p.roi_pct>10).length;
+            document.getElementById('pa-pos20').textContent = pat.meta.roi_gt_20_count ?? pat.patterns.filter(p=>p.roi_pct>20).length;
+            document.getElementById('pa-sig').textContent = pat.meta.sig_t15_count ?? pat.meta.significant_count ?? '—';
+            document.getElementById('pa-sig20').textContent = pat.meta.sig_t20_count ?? '—';
+            document.getElementById('pa-oos').textContent = oos.filter(o=>o.status==='PASS' || o.status==='OOS_PASS').length;
 
             // OOS table
             const oosBody = document.getElementById('pa-oos-body');
@@ -2103,28 +2137,62 @@
                 const tr = document.createElement('tr');
                 const trainCol = r.train_roi>=0 ? '#7eff7e' : '#ff7e7e';
                 const testCol = r.test_roi>=0 ? '#7eff7e' : '#ff7e7e';
-                const stCol = r.status==='OOS_PASS' ? '#7eff7e' : '#ff7e7e';
-                tr.innerHTML = `<td>${r.name}</td>
+                const isPass = (r.status==='PASS' || r.status==='OOS_PASS');
+                const stCol = isPass ? '#7eff7e' : '#ff7e7e';
+                const stTxt = isPass ? 'PASS' : (r.status==='FAIL' || r.status==='OOS_FAIL' ? 'FAIL' : r.status);
+                tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${r.name}</td>
                     <td style="color:${trainCol};text-align:right;">${r.train_roi>=0?'+':''}${r.train_roi.toFixed(2)}%</td>
                     <td style="color:${testCol};text-align:right;font-weight:700;">${r.test_roi>=0?'+':''}${r.test_roi.toFixed(2)}%</td>
                     <td style="text-align:right;">${r.train_n}</td>
                     <td style="text-align:right;">${r.test_n}</td>
-                    <td style="color:${stCol};">${r.status}</td>`;
+                    <td style="color:${stCol};font-weight:700;">${stTxt}</td>`;
                 oosBody.appendChild(tr);
             });
 
+            // Monte Carlo table
+            if (mc && mc.results && mc.results.length) {
+                const mcBody = document.getElementById('pa-mc-body');
+                mcBody.innerHTML = '';
+                const fmt = v => '€' + Math.round(v);
+                const colorVal = (v, base=100) => v >= base*1.5 ? '#7eff7e' : (v >= base ? 'var(--txt)' : '#ff7e7e');
+                mc.results.forEach(r => {
+                    const tr = document.createElement('tr');
+                    const s10 = r.sim.frac_0_1 || r.sim['frac_0.1'];
+                    const s25 = r.sim.frac_0_25 || r.sim['frac_0.25'];
+                    const s50 = r.sim.frac_0_5 || r.sim['frac_0.5'];
+                    tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${r.name}</td>
+                        <td style="text-align:right;">${r.hit_rate.toFixed(1)}%</td>
+                        <td style="text-align:right;">${r.avg_odd.toFixed(2)}</td>
+                        <td style="text-align:right;color:var(--acc);">${r.kelly_full_pct.toFixed(1)}%</td>
+                        <td style="text-align:right;color:${colorVal(s10.final_p50)};">${fmt(s10.final_p50)}</td>
+                        <td style="text-align:right;color:${colorVal(s10.final_p05)};">${fmt(s10.final_p05)}</td>
+                        <td style="text-align:right;">${s10.prob_2x}%</td>
+                        <td style="text-align:right;color:${colorVal(s25.final_p50)};">${fmt(s25.final_p50)}</td>
+                        <td style="text-align:right;color:${colorVal(s25.final_p05)};">${fmt(s25.final_p05)}</td>
+                        <td style="text-align:right;font-weight:700;">${s25.prob_2x}%</td>
+                        <td style="text-align:right;color:${colorVal(s50.final_p50)};">${fmt(s50.final_p50)}</td>
+                        <td style="text-align:right;color:${colorVal(s50.final_p05)};">${fmt(s50.final_p05)}</td>
+                        <td style="text-align:right;font-weight:700;">${s50.prob_2x}%</td>`;
+                    mcBody.appendChild(tr);
+                });
+            } else {
+                document.getElementById('pa-mc-body').innerHTML = '<tr><td colspan="13" style="color:var(--txt-2);text-align:center;padding:20px;">montecarlo.json não disponível.</td></tr>';
+            }
+
             // Family/Market dropdowns
-            const fams = [...new Set(pat.patterns.map(p=>p.name.split('[')[0]))].sort();
+            const fams = [...new Set(pat.patterns.map(p=>p.family || p.name.split('[')[0]))].sort();
             const mkts = [...new Set(pat.patterns.map(p=>p.market))].sort();
             const famSel = document.getElementById('pa-fam');
+            famSel.innerHTML = '<option value="">Todas</option>';
             fams.forEach(f=>{ const o=document.createElement('option'); o.value=f; o.textContent=f; famSel.appendChild(o); });
             const mktSel = document.getElementById('pa-mkt');
+            mktSel.innerHTML = '<option value="">Todos</option>';
             mkts.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; mktSel.appendChild(o); });
 
             filterPatterns();
         } catch (e) {
             const body = document.getElementById('pa-body');
-            body.innerHTML = `<tr><td colspan="9" style="color:#ff7e7e;padding:20px;">Erro a carregar patterns.json: ${e.message}. Garantir que data/patterns.json existe.</td></tr>`;
+            body.innerHTML = `<tr><td colspan="9" style="color:#ff7e7e;padding:20px;">Erro a carregar patterns.json: ${e.message}</td></tr>`;
         }
     }
 
@@ -2136,29 +2204,29 @@
         const minN = parseInt(document.getElementById('pa-n').value) || 0;
         const minT = parseFloat(document.getElementById('pa-t').value) || -999;
         const filtered = _patternsData.filter(p =>
-            (!fam || p.name.startsWith(fam)) &&
+            (!fam || (p.family||p.name).startsWith(fam)) &&
             (!mkt || p.market === mkt) &&
             p.roi_pct >= minRoi &&
             p.N >= minN &&
-            p.t_stat >= minT
+            (p.t_stat ?? 0) >= minT
         );
         const body = document.getElementById('pa-body');
         body.innerHTML = '';
         filtered.slice(0, 200).forEach(p=>{
             const tr = document.createElement('tr');
             const roiCol = p.roi_pct >= 0 ? '#7eff7e' : '#ff7e7e';
-            const tCol = p.t_stat >= 1.5 ? '#7eff7e' : (p.t_stat >= 1 ? '#ffd97e' : 'var(--txt-2)');
-            const nameClean = p.name.split('|')[0];
-            const sideOnly = p.name.split('|')[1] || '';
-            tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${nameClean}</td>
+            const t = p.t_stat ?? 0;
+            const tCol = t >= 1.5 ? '#7eff7e' : (t >= 1 ? '#ffd97e' : 'var(--txt-2)');
+            const lo = p.roi_lo ?? 0, hi = p.roi_hi ?? 0;
+            tr.innerHTML = `<td style="font-family:monospace;font-size:10px;">${p.name}</td>
                 <td>${p.market}</td>
-                <td>${p.side}</td>
+                <td>${p.side||''}</td>
                 <td style="text-align:right;">${p.N}</td>
                 <td style="text-align:right;">${p.hit_pct.toFixed(1)}%</td>
                 <td style="text-align:right;">${p.avg_odd.toFixed(2)}</td>
                 <td style="text-align:right;color:${roiCol};font-weight:700;">${p.roi_pct>=0?'+':''}${p.roi_pct.toFixed(2)}%</td>
-                <td style="text-align:right;font-size:9px;">[${p.roi_lo>=0?'+':''}${p.roi_lo.toFixed(1)},${p.roi_hi>=0?'+':''}${p.roi_hi.toFixed(1)}]</td>
-                <td style="text-align:right;color:${tCol};">${p.t_stat>=0?'+':''}${p.t_stat.toFixed(2)}</td>`;
+                <td style="text-align:right;font-size:9px;">[${lo>=0?'+':''}${lo.toFixed(1)},${hi>=0?'+':''}${hi.toFixed(1)}]</td>
+                <td style="text-align:right;color:${tCol};">${t>=0?'+':''}${t.toFixed(2)}</td>`;
             body.appendChild(tr);
         });
         document.getElementById('pa-count').textContent = `${filtered.length} matches (mostrando ${Math.min(200, filtered.length)})`;
